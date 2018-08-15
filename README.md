@@ -1,2 +1,2 @@
 # casa-ee-plugins
-Casa Enterprise Edition (EE) plugins. Please review the [license](/LICENSE) before useing. 
+Casa Enterprise Edition (EE) plugins. Please review the [LICENSE](/LICENSE) before useing. 
