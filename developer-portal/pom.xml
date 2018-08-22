@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.xdi</groupId>
+    <artifactId>${plugin.id}</artifactId>
+    <version>${parent.version}</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>org.xdi</groupId>
+        <artifactId>casa-ee-portal</artifactId>
+        <version>0.1</version>
+    </parent>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <plugin.id>developer-portal-plugin</plugin.id>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>casa-shared</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifestEntries>
+                            <Plugin-Id>${plugin.id}</Plugin-Id>
+                            <Plugin-Version>${version}</Plugin-Version>
+                            <Plugin-Provider>Gluu Inc.</Plugin-Provider>
+                            <Plugin-Class>org.gluu.casa.plugins.developerportal.DeveloperPortalPlugin</Plugin-Class>
+                            <Plugin-Description>
+                                Developer portal plugin
+                            </Plugin-Description>
+                            <Plugin-License>Available under the MIT License. See http://opensource.org/licenses/MIT for full text</Plugin-License>
+                            <Logger-Name>org.gluu.casa.plugins</Logger-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
