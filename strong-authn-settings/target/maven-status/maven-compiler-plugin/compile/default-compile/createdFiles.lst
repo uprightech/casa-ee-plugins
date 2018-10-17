@@ -1,0 +1,4 @@
+org\gluu\casa\plugins\strongauthn\StrongAuthnSettingsFragment.class
+org\gluu\casa\plugins\strongauthn\StrongAuthnSettingsMenu.class
+META-INF\extensions.idx
+org\gluu\casa\plugins\strongauthn\StrongAuthnSettingsPlugin.class

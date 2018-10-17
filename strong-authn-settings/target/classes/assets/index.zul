@@ -1,0 +1,9 @@
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns="native">
+
+    <z:div if="${sessionContext.user ne null}"
+           visible="@load(c:indexOf(configurationHandler.settings.enforcement2FA.toString(), 'CUSTOM') ge 0)">
+        <span class="i db pb1">${labels.policy.default_text}</span>
+        <z:button sclass="${css.primaryButton}" label="${labels.policy.go_manage}" href="${base}/policy.zul" />
+    </z:div>
+
+</z:zk>
