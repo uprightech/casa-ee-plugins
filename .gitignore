@@ -1,3 +1,17 @@
-.idea/**
-target/**
+# Eclipse project files
+.settings
+.project
+.classpath
+.pydevproject
+.tern-project
+.faces-config.xml.jsfdia
+
+# IntelliJ IDEA project files
+.idea
 *.iml
+
+# Maven
+target
+
+#Mac
+.DS_Store
