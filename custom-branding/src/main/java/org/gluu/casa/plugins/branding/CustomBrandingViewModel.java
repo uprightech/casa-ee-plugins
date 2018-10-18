@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
+ * ZK View Model for the custom branding page.
  * @author jgomer
  */
 public class CustomBrandingViewModel {

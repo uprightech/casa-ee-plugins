@@ -9,6 +9,7 @@ import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
 
 /**
+ * The plugin for custom branding Gluu Casa.
  * @author jgomer
  */
 public class CustomBrandingPlugin extends Plugin {

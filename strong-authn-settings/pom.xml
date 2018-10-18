@@ -13,7 +13,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <plugin.id>strong-authn-settings</plugin.id>
-        <plugin.version>1.0</plugin.version>
+        <plugin.version>3.1.4-SNAPSHOT</plugin.version>
     </properties>
 
     <repositories>
@@ -41,8 +41,11 @@
                             <Plugin-Provider>Gluu Inc.</Plugin-Provider>
                             <Plugin-Class>org.gluu.casa.plugins.strongauthn.StrongAuthnSettingsPlugin</Plugin-Class>
                             <Plugin-Description>
+                                Allows admins to specify the minimum number of credentials a user must enroll before they
+                                are able to turn on 2FA, and choose from a set of predefined policies for when 2FA should
+                                be prompted.
                             </Plugin-Description>
-                            <Plugin-License>TODO: This is MISSING</Plugin-License>
+                            <Plugin-License>Visit https://github.com/GluuFederation/casa-ee-plugins/raw/master/LICENSE</Plugin-License>
                             <Logger-Name>org.gluu.casa.plugins</Logger-Name>
                         </manifestEntries>
                     </archive>

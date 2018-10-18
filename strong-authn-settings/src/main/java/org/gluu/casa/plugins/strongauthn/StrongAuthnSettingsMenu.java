@@ -5,7 +5,8 @@ import org.gluu.casa.extension.navigation.NavigationMenu;
 import org.pf4j.Extension;
 
 /**
- * An extension class implementing the {@link NavigationMenu} extension point.
+ * An extension class implementing the {@link NavigationMenu} extension point. It allows to add a menu item to admins
+ * dashboard navigation menu
  * @author jgomer
  */
 @Extension

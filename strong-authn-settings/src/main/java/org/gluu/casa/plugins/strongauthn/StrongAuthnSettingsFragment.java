@@ -6,12 +6,11 @@
 package org.gluu.casa.plugins.strongauthn;
 
 import org.gluu.casa.extension.PreferredMethodFragment;
-import org.gluu.casa.extension.navigation.MenuType;
-import org.gluu.casa.extension.navigation.NavigationMenu;
 import org.pf4j.Extension;
 
 /**
- * An extension class implementing the {@link PreferredMethodFragment} extension point.
+ * An extension class implementing the {@link PreferredMethodFragment} extension point. It allows to insert extra markup
+ * when users have enabled 2fa in their accounts.
  * @author jgomer
  */
 @Extension

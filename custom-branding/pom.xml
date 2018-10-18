@@ -13,7 +13,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <plugin.id>custom-branding-plugin</plugin.id>
-        <plugin.version>1.0</plugin.version>
+        <plugin.version>3.1.4-SNAPSHOT</plugin.version>
     </properties>
 
     <repositories>
@@ -42,9 +42,9 @@
                             <Plugin-Class>org.gluu.casa.plugins.branding.CustomBrandingPlugin</Plugin-Class>
                             <Plugin-Description>
                                 Allows admins to apply a quick design customization by choosing colors, favicon, 
-                                and logo. Alternatively, to supply all assets (images and CSS files) externally.
+                                and logo. Or alternatively, to supply all assets (images and CSS files) externally.
                             </Plugin-Description>
-                            <Plugin-License>TODO: This is MISSING</Plugin-License>
+                            <Plugin-License>Visit https://github.com/GluuFederation/casa-ee-plugins/raw/master/LICENSE</Plugin-License>
                             <Logger-Name>org.gluu.casa.plugins</Logger-Name>
                         </manifestEntries>
                     </archive>

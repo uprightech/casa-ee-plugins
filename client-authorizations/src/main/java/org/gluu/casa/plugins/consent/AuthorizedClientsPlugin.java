@@ -9,7 +9,7 @@ import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
 
 /**
- * A plugin to solve the need described at <code>https://github.com/GluuFederation/cred-manager/issues/49</code>.
+ * The plugin for consent management.
  * @author jgomer
  */
 public class AuthorizedClientsPlugin extends Plugin {
