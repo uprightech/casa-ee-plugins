@@ -13,7 +13,6 @@ import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.BindingParam;
 import org.zkoss.bind.annotation.Command;
 import org.zkoss.bind.annotation.Init;
-import org.zkoss.bind.annotation.NotifyChange;
 import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zul.Messagebox;
@@ -58,12 +57,10 @@ public class AuthorizedClientsVM {
         return client.getOxAuthContactAsList().stream().collect(Collectors.joining(", "));
     }
 
-    @NotifyChange("clients")
     @Command
     public void revokeAll() {
 
-        String msg = Labels.getLabel("clients.authorized.warn_revoke_all", new Integer[]{clients.size()});
-        Messagebox.show(msg, null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+        Messagebox.show(Labels.getLabel("clients.authorized.remove_hint_all"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
                 event -> {
                     if (Messagebox.ON_YES.equals(event.getName())) {
                         logger.info("Removing all client authorizations for user {}", user.getId());
@@ -84,20 +81,27 @@ public class AuthorizedClientsVM {
 
     }
 
-    @NotifyChange("clients")
     @Command
     public void revoke(@BindingParam("clientId") String clientId, @BindingParam("clientName") String clientName) {
 
-        int currSize = clients.size();
-        caService.removeClientAuthorizations(user.getId(), user.getUserName(), clientId);
-        reloadClients();
+        Messagebox.show(Labels.getLabel("clients.authorized.remove_hint"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+                event -> {
+                    if (Messagebox.ON_YES.equals(event.getName())) {
 
-        if (currSize - 1 == clients.size()) {
-            UIUtils.showMessageUI(true);
-        } else {
-            //Removal failed
-            UIUtils.showMessageUI(false, Labels.getLabel("clients.authorized.remove_error", new String[]{clientName}));
-        }
+                        int currSize = clients.size();
+                        caService.removeClientAuthorizations(user.getId(), user.getUserName(), clientId);
+                        reloadClients();
+
+                        if (currSize - 1 == clients.size()) {
+                            UIUtils.showMessageUI(true);
+                        } else {
+                            //Removal failed
+                            UIUtils.showMessageUI(false, Labels.getLabel("clients.authorized.remove_error", new String[]{clientName}));
+                        }
+                        //trigger refresh (this method is asynchronous...)
+                        BindUtils.postNotifyChange(null, null, AuthorizedClientsVM.this, "clients");
+                    }
+                });
 
     }
 
