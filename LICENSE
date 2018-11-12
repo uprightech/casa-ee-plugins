@@ -45,7 +45,7 @@ that you abide by the agreements and restrictions of these 3rd party content or 
 indemnify and save Vendor and its licensors from all claims, damages, and expenses of whatever nature that may be made
 against Vendor and its licensors by 3rd party content and service providers as a result of Your use of the Software.
 
-7. REGISTRATION. The software will electronically register itself during installation to confirm that You have entered a
+7. REGISTRATION. The software may electronically register itself during installation to confirm that You have entered a
 valid "License Key". The registration process only sends the license information that You've entered (License key) and
 information about the software installed (Program ID, Version, Checksum and selected Network Interface MAC address). No other
 information is sent.
