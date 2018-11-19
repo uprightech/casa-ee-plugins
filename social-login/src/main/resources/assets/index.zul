@@ -1,0 +1,70 @@
+<?page language="xhtml"?>
+<?init class="org.zkoss.zk.ui.util.Composition" template="/general.zul"?>
+<zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns:w="client" xmlns:ca="client/attribute" xmlns="native">
+
+    <h:title self="@define(title)">${zkService.appName} - ${labels.sociallogin.title}</h:title>
+
+    <z:div if="${empty pageScope.error}" viewModel="@id('vm') @init('org.gluu.casa.plugins.accounts.SocialLoginViewModel')"
+           self="@define(maincontent)">
+
+        <z:include src="/back-home.zul"/>
+
+        <div class="${css['sectionsWrapper']}">
+            <section class="${css.section}">
+                <div class="${css.panel}">
+                    <h2 class="f4 dark-blue2">${labels.sociallogin.title}</h2>
+                    <p><z:label value="${c:l(empty vm.providers ? 'sociallogin.noproviders' : 'policy.text')}" /></p>
+                </div>
+
+                <h:div unless="${empty vm.providers}" class="${css.panel}">
+
+                    <div class="alert alert-success dn" id="feedback-social" role="alert" />
+
+                    <z:div sclass="flex items-center flex-column pt2 ph3-ns">
+                        <table class="table table-hover table-sm">
+                            <h:tbody children="@load(vm.providers)" sclass="f7">
+                                <zk:template name="children">
+                                    <tr>
+                                        <td><img src="@load(each.logo)" /></td>
+                                        <td><z:label value="@load(each.name)" /></td>
+                                        <td>
+                                            <z:div visible="@load(vm.accounts.get(each.name) ne null)">
+                                                <span>${c:l2('sociallogin.link_status', c:split(vm.accounts.get(each.name).getY(), ''))}</span>
+                                                <z:div visible="@load(not vm.accounts.get(each.name).getX())">
+                                                    <br />
+                                                    <i>${labels.sociallogin.disabled}</i>
+                                                </z:div>
+                                            </z:div>
+                                        </td>
+                                        <td>
+                                            <z:div visible="@load(vm.accounts.get(each.name) eq null)">
+                                                ${labels.sociallogin.buttons.link}
+                                            </z:div>
+                                            <z:div visible="@load(vm.accounts.get(each.name) ne null)">
+                                                <z:div visible="@load(vm.accounts.get(each.name).getX())">
+                                                    ${labels.sociallogin.buttons.disable}
+                                                </z:div>
+                                                <z:div visible="@load(not vm.accounts.get(each.name).getX())">
+                                                    ${labels.sociallogin.buttons.enable}
+                                                </z:div>
+                                                ${labels.sociallogin.buttons.remove}
+                                            </z:div>
+                                        </td>
+                                    </tr>
+                                </zk:template>
+                            </h:tbody>
+                        </table>
+                    </z:div>
+
+                </h:div>
+            </section>
+        </div>
+    </z:div>
+
+    <z:div self="@define(extra)">
+        <script>
+            alertRef = $('#feedback-social')
+        </script>
+    </z:div>
+
+</zk:zk>
