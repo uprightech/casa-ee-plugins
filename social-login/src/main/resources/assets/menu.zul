@@ -2,7 +2,7 @@
 
     <li>
         <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/" data-priority="${priority}">
-            <i class="mh2 fas fa-check-double" />
+            <i class="mh2 fas fa-users" />
             <span class="collapsible-menu-item di">${labels.sociallogin.title}</span>
         </a>
     </li>

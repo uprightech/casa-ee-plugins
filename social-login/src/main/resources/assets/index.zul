@@ -13,7 +13,7 @@
             <section class="${css.section}">
                 <div class="${css.panel}">
                     <h2 class="f4 dark-blue2">${labels.sociallogin.title}</h2>
-                    <p><z:label value="${c:l(empty vm.providers ? 'sociallogin.noproviders' : 'policy.text')}" /></p>
+                    <p><z:label value="${c:l(empty vm.providers ? 'sociallogin.noproviders' : 'sociallogin.text')}" /></p>
                 </div>
 
                 <h:div unless="${empty vm.providers}" class="${css.panel}">
@@ -21,33 +21,41 @@
                     <div class="alert alert-success dn" id="feedback-social" role="alert" />
 
                     <z:div sclass="flex items-center flex-column pt2 ph3-ns">
-                        <table class="table table-hover table-sm">
-                            <h:tbody children="@load(vm.providers)" sclass="f7">
+                        <table class="table table-sm">
+                            <h:tbody children="@load(vm.providers)" sclass="f7 table-striped">
                                 <zk:template name="children">
                                     <tr>
-                                        <td><img src="@load(each.logo)" /></td>
+                                        <td>
+                                            <h:div unless="${empty each.logo}"><img src="${each.logo}" width="75" /></h:div>
+                                        </td>
                                         <td><z:label value="@load(each.name)" /></td>
                                         <td>
+                                            <h:span visible="@load(vm.accounts.get(each.name) ne null)" sclass="b">
+                                                ${labels.sociallogin.link_unavailable}
+                                            </h:span>
                                             <z:div visible="@load(vm.accounts.get(each.name) ne null)">
-                                                <span>${c:l2('sociallogin.link_status', c:split(vm.accounts.get(each.name).getY(), ''))}</span>
-                                                <z:div visible="@load(not vm.accounts.get(each.name).getX())">
-                                                    <br />
-                                                    <i>${labels.sociallogin.disabled}</i>
-                                                </z:div>
+                                                <span>${c:l2('sociallogin.link_status', c:split(vm.accounts.get(each.name).getY(), ':;'))}</span>
+                                                <h:span visible="@load(not vm.accounts.get(each.name).getX())" sclass="db b">
+                                                    ${labels.sociallogin.link_disabled}
+                                                </h:span>
                                             </z:div>
                                         </td>
                                         <td>
                                             <z:div visible="@load(vm.accounts.get(each.name) eq null)">
-                                                ${labels.sociallogin.buttons.link}
+                                                <z:button label="${labels.sociallogin.buttons.link}"
+                                                          sclass="${css.primaryButton} lh-tight mt1 mr2" onClick="@command('link', provider = each.name)" />
                                             </z:div>
                                             <z:div visible="@load(vm.accounts.get(each.name) ne null)">
                                                 <z:div visible="@load(vm.accounts.get(each.name).getX())">
-                                                    ${labels.sociallogin.buttons.disable}
+                                                    <z:button label="${labels.sociallogin.buttons.disable}"
+                                                              sclass="${css.secondaryButton} lh-tight mt1 mr2" onClick="@command('disable', provider = each.name)" />
                                                 </z:div>
                                                 <z:div visible="@load(not vm.accounts.get(each.name).getX())">
-                                                    ${labels.sociallogin.buttons.enable}
+                                                    <z:button label="${labels.sociallogin.buttons.enable}"
+                                                              sclass="${css.secondaryButton} lh-tight mt1 mr2" onClick="@command('enable', provider = each.name)" />
                                                 </z:div>
-                                                ${labels.sociallogin.buttons.remove}
+                                                <z:button label="${labels.sociallogin.buttons.remove}"
+                                                          sclass="${css.secondaryButton} lh-tight mt1" onClick="@command('remove', provider = each.name)" />
                                             </z:div>
                                         </td>
                                     </tr>

@@ -2,7 +2,7 @@
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
-    <id>jar-with-dependencies-and-exclude-classes</id>
+    <id>fat-jar</id>
     <formats>
         <format>jar</format>
     </formats>
@@ -16,6 +16,7 @@
             <includes>
                 <include>org.xdi:casa-shared</include>
                 <include>org.xdi:oxcore-service</include>
+                <include>redis.clients:jedis</include>
             </includes>
         </dependencySet>
     </dependencySets>

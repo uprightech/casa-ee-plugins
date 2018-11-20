@@ -8,11 +8,10 @@ import org.gluu.casa.ui.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
-import org.zkoss.bind.annotation.Command;
-import org.zkoss.bind.annotation.Init;
-import org.zkoss.bind.annotation.NotifyChange;
+import org.zkoss.bind.annotation.*;
 import org.zkoss.util.Pair;
 import org.zkoss.util.resource.Labels;
+import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zul.Messagebox;
 
@@ -24,6 +23,8 @@ import java.util.Map;
  * @author jgomer
  */
 public class SocialLoginViewModel {
+
+    public static final String SOCIAL_LINK_QUEUE="social_queue";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -58,7 +59,7 @@ public class SocialLoginViewModel {
 
     @NotifyChange("providers")
     @Command
-    public void disable(String provider) {
+    public void disable(@BindingParam("provider") String provider) {
 
         boolean succ = slService.unlink(userId, provider);
         if (succ) {
@@ -68,8 +69,36 @@ public class SocialLoginViewModel {
 
     }
 
+    @NotifyChange("providers")
     @Command
-    public void remove(String provider) {
+    public void enable(@BindingParam("provider") String provider) {
+
+        boolean succ = slService.enableLink(userId, provider);
+        if (succ) {
+            parseLinkedAccounts();
+        }
+        UIUtils.showMessageUI(succ);
+
+    }
+
+    @Command
+    public void link(@BindingParam("provider") String provider) {
+
+        EventQueues.lookup(SOCIAL_LINK_QUEUE, EventQueues.SESSION, true)
+                .subscribe(event -> {
+                    if (event.getName().equals(provider)) {
+                        //Linking in social network was successful
+                        if (slService.link(userId, provider, event.getData().toString())) {
+                            parseLinkedAccounts();
+                            BindUtils.postNotifyChange(null, null, SocialLoginViewModel.this, "providers");
+                        }
+                    }
+                });
+
+    }
+
+    @Command
+    public void remove(@BindingParam("provider") String provider) {
 
         Messagebox.show(Labels.getLabel("sociallogin.remove_hint"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
                 event -> {
@@ -94,13 +123,6 @@ public class SocialLoginViewModel {
         accounts = new HashMap<>();
         linked.forEach(acc -> accounts.put(acc.getProvider(), new Pair<>(true, acc.getUid())));
         unlinked.forEach(acc -> accounts.put(acc.getProvider(), new Pair<>(false, acc.getUid())));
-
-        providers.stream().map(Provider::getName).forEach(provider -> {
-            if (linked.stream().map(ExternalAccount::getProvider).noneMatch(provider::equals)
-                && unlinked.stream().map(ExternalAccount::getProvider).noneMatch(provider::equals)){
-                accounts.put(provider, new Pair<>(null, null));
-            }
-        });
 
     }
 

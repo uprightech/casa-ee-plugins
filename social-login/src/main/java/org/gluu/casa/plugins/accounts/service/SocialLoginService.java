@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  */
 public class SocialLoginService {
 
-    private static final Path OXLDAP_PATH = Paths.get("/etc/gluu/conf/ox-ldap.properties");
+    private static final Path OXLDAP_PATH = Paths.get("C:/Users/jgomer/Desktop/gluu/tasks/local_deploy/oxauth_3.1/conf/ox-ldap.properties"/*"/etc/gluu/conf/ox-ldap.properties"*/);
     private static final String OXPASSPORT_PROPERTY = "oxpassport_ConfigurationEntryDN";
     private static final String OXEXTERNALUID_PREFIX = "passport-";
 
@@ -61,7 +61,7 @@ public class SocialLoginService {
                     if (belongToProviders(provider)) {
                         ExternalAccount acc = new ExternalAccount();
                         acc.setProvider(provider);
-                        acc.setUid(externalUid.substring(OXEXTERNALUID_PREFIX.length() + 1));
+                        acc.setUid(externalUid.substring(i + 1));
                         alreadyLinked.add(acc);
                     }
                 }
@@ -87,6 +87,35 @@ public class SocialLoginService {
         }
 
         return success;
+
+    }
+
+    public boolean enableLink(String id, String provider) {
+
+        boolean success = false;
+        ExternalIdentityPerson p = ldapService.get(ExternalIdentityPerson.class, ldapService.getPersonDn(id));
+
+        Pair<String, List<String>> tmp = removeProvider(provider, p.getOxUnlinkedExternalUids());
+        List<String> unlinked = tmp.getY();
+        String oxExternalUid = tmp.getX();
+
+        if (oxExternalUid != null) {
+            List<String> linked = Utils.listfromArray(p.getOxExternalUid());
+            unlinked.add(oxExternalUid);
+            success = updateExternalIdentities(p, linked, unlinked);
+        }
+
+        return success;
+
+    }
+
+    public boolean link(String id, String provider, String externalId) {
+
+        ExternalIdentityPerson p = ldapService.get(ExternalIdentityPerson.class, ldapService.getPersonDn(id));
+        List<String> list = Utils.listfromArray(p.getOxExternalUid());
+        list.add(String.format("passport-%s:%s", provider, externalId));
+        p.setOxExternalUid(list.toArray(new String[0]));
+        return ldapService.modify(p, ExternalIdentityPerson.class);
 
     }
 
