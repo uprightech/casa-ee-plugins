@@ -24,6 +24,7 @@ import java.util.stream.Stream;
  */
 public class SocialLoginService {
 
+    //TODO: change path
     private static final Path OXLDAP_PATH = Paths.get("C:/Users/jgomer/Desktop/gluu/tasks/local_deploy/oxauth_3.1/conf/ox-ldap.properties"/*"/etc/gluu/conf/ox-ldap.properties"*/);
     private static final String OXPASSPORT_PROPERTY = "oxpassport_ConfigurationEntryDN";
     private static final String OXEXTERNALUID_PREFIX = "passport-";
