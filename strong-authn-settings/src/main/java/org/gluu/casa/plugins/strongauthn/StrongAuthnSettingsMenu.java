@@ -13,7 +13,7 @@ import org.pf4j.Extension;
 public class StrongAuthnSettingsMenu implements NavigationMenu {
 
     public String getContentsUrl() {
-        return "menu.zul";
+        return "admin/menu.zul";
     }
 
     public MenuType menuType() {
