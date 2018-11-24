@@ -1,6 +1,7 @@
 package org.gluu.casa.plugins.accounts;
 
 import org.gluu.casa.plugins.accounts.ldap.ExternalAccount;
+import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 import org.gluu.casa.plugins.accounts.service.SocialLoginService;
 import org.gluu.casa.service.ISessionContext;
@@ -11,6 +12,7 @@ import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.*;
 import org.zkoss.util.Pair;
 import org.zkoss.util.resource.Labels;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zul.Messagebox;
@@ -84,16 +86,24 @@ public class SocialLoginViewModel {
     @Command
     public void link(@BindingParam("provider") String provider) {
 
-        EventQueues.lookup(SOCIAL_LINK_QUEUE, EventQueues.SESSION, true)
-                .subscribe(event -> {
-                    if (event.getName().equals(provider)) {
-                        //Linking in social network was successful
-                        if (slService.link(userId, provider, event.getData().toString())) {
-                            parseLinkedAccounts();
-                            BindUtils.postNotifyChange(null, null, SocialLoginViewModel.this, "providers");
+        String url = slService.getRedirectUrl(provider);
+        if (url != null) {
+
+            EventQueues.lookup(SOCIAL_LINK_QUEUE, EventQueues.SESSION, true)
+                    .subscribe(event -> {
+                        if (event.getName().equals(provider)) {
+                            //Linking in social network was successful
+                            if (slService.link(userId, provider, event.getData().toString())) {
+                                parseLinkedAccounts();
+                                BindUtils.postNotifyChange(null, null, SocialLoginViewModel.this, "providers");
+                            }
                         }
-                    }
-                });
+                    });
+            PendingLinks.add(userId, provider);
+            Executions.getCurrent().sendRedirect(url, "_blank");
+        } else {
+            UIUtils.showMessageUI(false, Labels.getLabel("sociallogin.link_redirect_failed", new String[]{provider}));
+        }
 
     }
 

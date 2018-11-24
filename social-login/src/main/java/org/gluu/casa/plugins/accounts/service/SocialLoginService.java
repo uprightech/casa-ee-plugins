@@ -7,6 +7,9 @@ import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
 import org.gluu.casa.plugins.accounts.ldap.oxPassportConfiguration;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 import org.gluu.casa.service.ILdapService;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.model.SimpleCustomProperty;
@@ -37,9 +40,12 @@ public class SocialLoginService {
 
     private List<Provider> providers;
 
+    private String serverUrl;
+
     public SocialLoginService() {
         mapper = new ObjectMapper();
         ldapService = Utils.managedBean(ILdapService.class);
+        serverUrl = ldapService.getIssuerUrl();
         //Lookup the authentication providers supported in the current Passport installation
         parseProviders();
     }
@@ -129,6 +135,11 @@ public class SocialLoginService {
 
     }
 
+    public String getRedirectUrl(String provider) {
+        String token = getPassportToken();
+        return Utils.isEmpty(token) ? null : String.format("https://%s/passport/casa/%s/%s", serverUrl, provider, token);
+    }
+
     private void parseProviders() {
 
         try {
@@ -196,6 +207,20 @@ public class SocialLoginService {
         p.setOxExternalUid(linked.toArray(new String[0]));
         p.setOxUnlinkedExternalUids(unlinked.toArray(new String[0]));
         return ldapService.modify(p, ExternalIdentityPerson.class);
+    }
+
+    private String getPassportToken() {
+
+        ResteasyClient client = new ResteasyClientBuilder().build();
+        ResteasyWebTarget target = client.target(String.format("https://%s/passport/token", serverUrl));
+        String data = target.request().get(String.class);
+        try {
+            return mapper.readTree(data).get("token_").asText();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return null;
+        }
+
     }
 
 }
