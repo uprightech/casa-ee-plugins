@@ -28,13 +28,13 @@
                                         <td>
                                             <h:div unless="${empty each.logo}"><img src="${each.logo}" width="75" /></h:div>
                                         </td>
-                                        <td><z:label value="@load(each.name)" /></td>
+                                        <td>${each.name}</td>
                                         <td>
-                                            <h:span visible="@load(vm.accounts.get(each.name) ne null)" sclass="b">
+                                            <h:span visible="@load(vm.accounts.get(each.name) eq null)">
                                                 ${labels.sociallogin.link_unavailable}
                                             </h:span>
                                             <z:div visible="@load(vm.accounts.get(each.name) ne null)">
-                                                <span>${c:l2('sociallogin.link_status', c:split(vm.accounts.get(each.name).getY(), ':;'))}</span>
+                                                ${c:l2('sociallogin.link_status', c:split(vm.accounts.get(each.name).getY(), ':;'))}
                                                 <h:span visible="@load(not vm.accounts.get(each.name).getX())" sclass="db b">
                                                     ${labels.sociallogin.link_disabled}
                                                 </h:span>
@@ -43,19 +43,19 @@
                                         <td>
                                             <z:div visible="@load(vm.accounts.get(each.name) eq null)">
                                                 <z:button label="${labels.sociallogin.buttons.link}"
-                                                          sclass="${css.primaryButton} lh-tight mt1 mr2" onClick="@command('link', provider = each.name)" />
+                                                          sclass="${css.primaryButton} lh-tight mt1 mr2" onClick="@command('link', provider=each.name)" />
                                             </z:div>
                                             <z:div visible="@load(vm.accounts.get(each.name) ne null)">
                                                 <z:div visible="@load(vm.accounts.get(each.name).getX())">
                                                     <z:button label="${labels.sociallogin.buttons.disable}"
-                                                              sclass="${css.secondaryButton} lh-tight mt1 mr2" onClick="@command('disable', provider = each.name)" />
+                                                              sclass="${css.secondaryButton} lh-tight mt1 mr2" onClick="@command('disable', provider=each.name)" />
                                                 </z:div>
                                                 <z:div visible="@load(not vm.accounts.get(each.name).getX())">
                                                     <z:button label="${labels.sociallogin.buttons.enable}"
-                                                              sclass="${css.secondaryButton} lh-tight mt1 mr2" onClick="@command('enable', provider = each.name)" />
+                                                              sclass="${css.secondaryButton} lh-tight mt1 mr2" onClick="@command('enable', provider=each.name)" />
                                                 </z:div>
                                                 <z:button label="${labels.sociallogin.buttons.remove}"
-                                                          sclass="${css.secondaryButton} lh-tight mt1" onClick="@command('remove', provider = each.name)" />
+                                                          sclass="${css.secondaryButton} lh-tight mt1" onClick="@command('remove', provider=each.name)" />
                                             </z:div>
                                         </td>
                                     </tr>

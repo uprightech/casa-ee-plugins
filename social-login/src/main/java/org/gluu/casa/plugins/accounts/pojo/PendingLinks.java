@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by jgomer on 2018-11-20.
+ * @author jgomer
  */
 public class PendingLinks {
 

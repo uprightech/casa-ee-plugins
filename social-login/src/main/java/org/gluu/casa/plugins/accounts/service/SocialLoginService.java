@@ -56,7 +56,7 @@ public class SocialLoginService {
 
     public List<ExternalAccount> getAccounts(String id, boolean linked) {
 
-        List<ExternalAccount> alreadyLinked = new ArrayList<>();
+        List<ExternalAccount> externalAccts = new ArrayList<>();
         ExternalIdentityPerson p = ldapService.get(ExternalIdentityPerson.class, ldapService.getPersonDn(id));
 
         for (String externalUid : Optional.ofNullable(linked ? p.getOxExternalUid() : p.getOxUnlinkedExternalUids()).orElse(new String[0])) {
@@ -69,12 +69,12 @@ public class SocialLoginService {
                         ExternalAccount acc = new ExternalAccount();
                         acc.setProvider(provider);
                         acc.setUid(externalUid.substring(i + 1));
-                        alreadyLinked.add(acc);
+                        externalAccts.add(acc);
                     }
                 }
             }
         }
-        return alreadyLinked;
+        return externalAccts;
 
     }
 
@@ -88,7 +88,7 @@ public class SocialLoginService {
         String oxExternalUid = tmp.getX();
 
         if (oxExternalUid != null) {
-            List<String> unlinked = Utils.listfromArray(p.getOxUnlinkedExternalUids());
+            List<String> unlinked = new ArrayList<>(Utils.listfromArray(p.getOxUnlinkedExternalUids()));
             unlinked.add(oxExternalUid);
             success = updateExternalIdentities(p, linked, unlinked);
         }
@@ -107,7 +107,7 @@ public class SocialLoginService {
         String oxExternalUid = tmp.getX();
 
         if (oxExternalUid != null) {
-            List<String> linked = Utils.listfromArray(p.getOxExternalUid());
+            List<String> linked = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
             unlinked.add(oxExternalUid);
             success = updateExternalIdentities(p, linked, unlinked);
         }
@@ -119,7 +119,7 @@ public class SocialLoginService {
     public boolean link(String id, String provider, String externalId) {
 
         ExternalIdentityPerson p = ldapService.get(ExternalIdentityPerson.class, ldapService.getPersonDn(id));
-        List<String> list = Utils.listfromArray(p.getOxExternalUid());
+        List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
         list.add(String.format("passport-%s:%s", provider, externalId));
         p.setOxExternalUid(list.toArray(new String[0]));
         return ldapService.modify(p, ExternalIdentityPerson.class);
@@ -146,7 +146,7 @@ public class SocialLoginService {
             providers = new ArrayList<>();
 
             String dn = Files.newBufferedReader(OXLDAP_PATH).lines().filter(l -> l.startsWith(OXPASSPORT_PROPERTY))
-                    .findFirst().map(l -> l.substring(OXPASSPORT_PROPERTY.length() + 1)).orElse(null);
+                    .findFirst().map(l -> l.substring(OXPASSPORT_PROPERTY.length())).get();
             oxPassportConfiguration passportConfig = ldapService.get(oxPassportConfiguration.class, dn);
 
             if (passportConfig != null) {
@@ -211,10 +211,10 @@ public class SocialLoginService {
 
     private String getPassportToken() {
 
-        ResteasyClient client = new ResteasyClientBuilder().build();
-        ResteasyWebTarget target = client.target(String.format("https://%s/passport/token", serverUrl));
-        String data = target.request().get(String.class);
         try {
+            ResteasyClient client = new ResteasyClientBuilder().build();
+            ResteasyWebTarget target = client.target(String.format("https://%s/passport/token", serverUrl));
+            String data = target.request().get(String.class);
             return mapper.readTree(data).get("token_").asText();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

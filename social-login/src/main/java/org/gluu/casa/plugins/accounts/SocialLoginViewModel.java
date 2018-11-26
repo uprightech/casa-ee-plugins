@@ -45,6 +45,10 @@ public class SocialLoginViewModel {
         return providers;
     }
 
+    public Map<String, Pair<Boolean, String>> getAccounts() {
+        return accounts;
+    }
+
     @Init
     public void init() {
         logger.debug("Initializing ViewModel");
@@ -53,10 +57,6 @@ public class SocialLoginViewModel {
         slService = new SocialLoginService();
         providers = slService.getAvailableProviders();
         parseLinkedAccounts();
-    }
-
-    public Map<String, Pair<Boolean, String>> getAccounts() {
-        return accounts;
     }
 
     @NotifyChange("providers")

@@ -31,6 +31,8 @@ import java.util.Map;
 @Path("/idp-linking")
 public class LinkingService {
 
+    public static final String CUSTOM_HEADER = "Linking-Summary";
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private ObjectMapper mapper = new ObjectMapper();
@@ -45,6 +47,7 @@ public class LinkingService {
     private UriInfo uriInfo;
 
     public LinkingService() {
+
         try {
             mapper = new ObjectMapper();
             ldapService = Utils.managedBean(ILdapService.class);
@@ -61,6 +64,7 @@ public class LinkingService {
             logger.error(e.getMessage(), e);
             logger.warn("Service for linking external identities may not work properly");
         }
+
     }
 
     @GET
@@ -111,7 +115,7 @@ public class LinkingService {
         String data = mapper.writeValueAsString(summary);
         String url = uriInfo.getAbsolutePath().toString() + "/../account-linking-result.zul";
         URI uri = new URL(url.replaceFirst("/rest", "")).toURI();
-        return Response.seeOther(uri).header("Linking-Summary", data).build();
+        return Response.seeOther(uri).header(CUSTOM_HEADER, data).build();
 
     }
 
