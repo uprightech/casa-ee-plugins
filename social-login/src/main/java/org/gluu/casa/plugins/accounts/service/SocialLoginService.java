@@ -7,9 +7,6 @@ import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
 import org.gluu.casa.plugins.accounts.ldap.oxPassportConfiguration;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 import org.gluu.casa.service.ILdapService;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.model.SimpleCustomProperty;
@@ -27,8 +24,7 @@ import java.util.stream.Stream;
  */
 public class SocialLoginService {
 
-    //TODO: change path
-    private static final Path OXLDAP_PATH = Paths.get("C:/Users/jgomer/Desktop/gluu/tasks/local_deploy/oxauth_3.1/conf/ox-ldap.properties"/*"/etc/gluu/conf/ox-ldap.properties"*/);
+    private static final Path OXLDAP_PATH = Paths.get("/etc/gluu/conf/ox-ldap.properties");
     private static final String OXPASSPORT_PROPERTY = "oxpassport_ConfigurationEntryDN";
     private static final String OXEXTERNALUID_PREFIX = "passport-";
 
@@ -40,12 +36,9 @@ public class SocialLoginService {
 
     private List<Provider> providers;
 
-    private String serverUrl;
-
     public SocialLoginService() {
         mapper = new ObjectMapper();
         ldapService = Utils.managedBean(ILdapService.class);
-        serverUrl = ldapService.getIssuerUrl();
         //Lookup the authentication providers supported in the current Passport installation
         parseProviders();
     }
@@ -135,11 +128,6 @@ public class SocialLoginService {
 
     }
 
-    public String getRedirectUrl(String provider) {
-        String token = getPassportToken();
-        return Utils.isEmpty(token) ? null : String.format("https://%s/passport/casa/%s/%s", serverUrl, provider, token);
-    }
-
     private void parseProviders() {
 
         try {
@@ -147,6 +135,9 @@ public class SocialLoginService {
 
             String dn = Files.newBufferedReader(OXLDAP_PATH).lines().filter(l -> l.startsWith(OXPASSPORT_PROPERTY))
                     .findFirst().map(l -> l.substring(OXPASSPORT_PROPERTY.length())).get();
+            //skip uninteresting chars
+            dn = dn.replaceFirst("[\\W]*=[\\W]*","");
+
             oxPassportConfiguration passportConfig = ldapService.get(oxPassportConfiguration.class, dn);
 
             if (passportConfig != null) {
@@ -160,7 +151,9 @@ public class SocialLoginService {
                                 String logo = Optional.ofNullable(pcf.getFieldset()).orElse(Collections.emptyList()).stream()
                                         .filter(prop -> prop.getValue1().equals("logo_img")).map(SimpleCustomProperty::getValue2)
                                         .findFirst().orElse(null);
-                                if (logo != null && !logo.startsWith("http")) {
+                                if (logo == null) {
+                                    logo = "/oxauth/auth/passport/img/" + provider.getName() + ".png";
+                                } else if (!logo.startsWith("http")) {
                                     logo = "/oxauth/auth/passport/" + logo;
                                 }
                                 provider.setLogo(logo);
@@ -207,20 +200,6 @@ public class SocialLoginService {
         p.setOxExternalUid(linked.toArray(new String[0]));
         p.setOxUnlinkedExternalUids(unlinked.toArray(new String[0]));
         return ldapService.modify(p, ExternalIdentityPerson.class);
-    }
-
-    private String getPassportToken() {
-
-        try {
-            ResteasyClient client = new ResteasyClientBuilder().build();
-            ResteasyWebTarget target = client.target(String.format("https://%s/passport/token", serverUrl));
-            String data = target.request().get(String.class);
-            return mapper.readTree(data).get("token_").asText();
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return null;
-        }
-
     }
 
 }

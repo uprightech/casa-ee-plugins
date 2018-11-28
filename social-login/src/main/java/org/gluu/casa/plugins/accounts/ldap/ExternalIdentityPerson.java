@@ -1,6 +1,7 @@
 package org.gluu.casa.plugins.accounts.ldap;
 
 import com.unboundid.ldap.sdk.ReadOnlyEntry;
+import com.unboundid.ldap.sdk.persist.FilterUsage;
 import com.unboundid.ldap.sdk.persist.LDAPEntryField;
 import com.unboundid.ldap.sdk.persist.LDAPField;
 import com.unboundid.ldap.sdk.persist.LDAPObject;
@@ -17,11 +18,11 @@ public class ExternalIdentityPerson extends BaseLdapPerson {
     private ReadOnlyEntry ldapEntry;
 
     // The field used for optional attribute oxExternalUid.
-    @LDAPField
+    @LDAPField(filterUsage= FilterUsage.ALWAYS_ALLOWED)
     private String[] oxExternalUid;
 
     // The field used for optional attribute oxUnlinkedExternalUids.
-    @LDAPField
+    @LDAPField(filterUsage=FilterUsage.ALWAYS_ALLOWED)
     private String[] oxUnlinkedExternalUids;
 
     /**

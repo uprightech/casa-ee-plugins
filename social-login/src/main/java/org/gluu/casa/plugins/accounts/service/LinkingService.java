@@ -15,6 +15,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.zkoss.util.resource.Labels;
+import org.zkoss.web.servlet.http.Encodes;
 
 import javax.ws.rs.*;
 import javax.ws.rs.Path;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -30,8 +32,6 @@ import java.util.Map;
  */
 @Path("/idp-linking")
 public class LinkingService {
-
-    public static final String CUSTOM_HEADER = "Linking-Summary";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -42,6 +42,8 @@ public class LinkingService {
     private String keyStoreFile;
 
     private String keyStorePassword;
+
+    private String remoteUserNameAttribute;
 
     @Context
     private UriInfo uriInfo;
@@ -60,6 +62,9 @@ public class LinkingService {
             keyStoreFile = props.get("key_store_file");
             keyStorePassword = props.get("key_store_password");
 
+            int i = Utils.firstTrue(Arrays.asList(props.get("generic_local_attributes_list").split(",\\s*")), "uid"::equals);
+            remoteUserNameAttribute = i >= 0 ? props.get("generic_remote_attributes_list").split(",\\s*")[i] : "id";
+
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             logger.warn("Service for linking external identities may not work properly");
@@ -74,19 +79,21 @@ public class LinkingService {
 
     @POST
     @Path("{provider}")
-    public Response doLink(String userJwt, @PathParam("provider") String provider) throws Exception {
+    public Response doLink(@FormParam("user") String userJwt, @PathParam("provider") String provider) throws Exception {
 
         LinkingSummary summary = new LinkingSummary();
         String msg = null;
-        try {
-            ISessionContext sessionContext = Utils.managedBean(ISessionContext.class);
-            String userId = sessionContext.getLoggedUser().getId();
 
+        ISessionContext sessionContext = Utils.managedBean(ISessionContext.class);
+        String userId = sessionContext.getLoggedUser().getId();
+
+        try {
             if (PendingLinks.contains(userId, provider)) {
                 Jwt jwt = validateJWT(userJwt);
                 if (jwt != null) {
+                    logger.info("user profile JWT validated successfully\n{}", jwt);
                     String profile = jwt.getClaims().getClaimAsString("data");
-                    String uid = mapper.readTree(profile).get("id").asText();
+                    String uid = mapper.readTree(profile).get(remoteUserNameAttribute).asText();
 
                     //Verify it's not already enrolled by someone
                     if (!alreadyAssigned(provider, uid)) {
@@ -112,10 +119,13 @@ public class LinkingService {
             summary.setErrorMessage(msg);
         }
 
-        String data = mapper.writeValueAsString(summary);
-        String url = uriInfo.getAbsolutePath().toString() + "/../account-linking-result.zul";
+        //Removes the /idp-linking/{provider} portion
+        String url = uriInfo.getAbsolutePath().toString();
+        url+= "/../../account-linking-result.zul?provider=" + Encodes.encodeURIComponent(provider);
         URI uri = new URL(url.replaceFirst("/rest", "")).toURI();
-        return Response.seeOther(uri).header(CUSTOM_HEADER, data).build();
+
+        PendingLinks.add(userId, provider, summary);
+        return Response.seeOther(uri).build();
 
     }
 
