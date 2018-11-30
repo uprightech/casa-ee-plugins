@@ -69,9 +69,11 @@ public class SocialLoginViewModel {
             EventQueues.lookup(SOCIAL_LINK_QUEUE, EventQueues.SESSION, true)
                     .subscribe(event -> {
                         if (event.getName().equals(EVENT_NAME)) {
+
                             logger.info("Received linked event");
                             LinkingSummary summary = (LinkingSummary) event.getData();
                             String provider = summary.getProvider();
+
                             PendingLinks.remove(userId, provider);
                             //Linking in social network was successful
                             if (slService.link(userId, provider, summary.getUid())) {
@@ -124,6 +126,7 @@ public class SocialLoginViewModel {
         Messagebox.show(Labels.getLabel("sociallogin.remove_hint"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
                 event -> {
                     if (Messagebox.ON_YES.equals(event.getName())) {
+
                         if (slService.delete(userId, provider)) {
                             parseLinkedAccounts();
                             UIUtils.showMessageUI(true, Labels.getLabel("sociallogin.removed_link", new String[]{provider}));
@@ -138,6 +141,7 @@ public class SocialLoginViewModel {
 
     private void parseLinkedAccounts() {
 
+        logger.info("Parsing linked/unlinked accounts for {}", userId);
         List<ExternalAccount> linked = slService.getAccounts(userId, true);
         List<ExternalAccount> unlinked = slService.getAccounts(userId, false);
 

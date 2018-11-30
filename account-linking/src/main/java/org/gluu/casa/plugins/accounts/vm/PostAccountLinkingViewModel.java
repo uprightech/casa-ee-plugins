@@ -39,6 +39,7 @@ public class PostAccountLinkingViewModel {
 
     @Init
     public void init() {
+
         try {
             logger.debug("Initializing ViewModel");
             title = Labels.getLabel("general.error.general");
@@ -60,6 +61,8 @@ public class PostAccountLinkingViewModel {
                 } else {
                     text = summary.getErrorMessage();
                 }
+            } else {
+                logger.warn("No linking is pending for provider {} and user {}", provider, userId);
             }
         } catch (Exception e) {
             text = e.getMessage();

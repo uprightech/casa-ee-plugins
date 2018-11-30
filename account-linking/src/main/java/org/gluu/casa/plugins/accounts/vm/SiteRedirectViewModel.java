@@ -53,6 +53,7 @@ public class SiteRedirectViewModel {
     }
 
     private String getRedirectUrl(String provider) {
+        logger.info("Building a passport redirect URL to start with linking process");
         String token = getPassportToken();
         return Utils.isEmpty(token) ? null : String.format("%s/passport/casa/%s/%s", serverUrl, provider, token);
     }

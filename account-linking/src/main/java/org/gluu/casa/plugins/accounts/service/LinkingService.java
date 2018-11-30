@@ -51,6 +51,7 @@ public class LinkingService {
     public LinkingService() {
 
         try {
+            logger.info("Creating an instance of LinkingService");
             mapper = new ObjectMapper();
             ldapService = Utils.managedBean(ILdapService.class);
 
@@ -74,6 +75,7 @@ public class LinkingService {
 
     @GET
     public Response processError(@QueryParam("failure") String msg) throws Exception {
+        logger.warn("An error occurred: {}", msg);
         return Response.serverError().entity(msg).build();
     }
 
@@ -86,10 +88,12 @@ public class LinkingService {
 
         ISessionContext sessionContext = Utils.managedBean(ISessionContext.class);
         String userId = sessionContext.getLoggedUser().getId();
+        logger.info("Linking provider {} to user {} ...", provider, userId);
 
         try {
             if (PendingLinks.contains(userId, provider)) {
                 Jwt jwt = validateJWT(userJwt);
+
                 if (jwt != null) {
                     logger.info("user profile JWT validated successfully\n{}", jwt);
                     String profile = jwt.getClaims().getClaimAsString("data");
@@ -125,6 +129,7 @@ public class LinkingService {
         URI uri = new URL(url.replaceFirst("/rest", "")).toURI();
 
         PendingLinks.add(userId, provider, summary);
+        logger.debug("Redirecting to {}", uri.toString());
         return Response.seeOther(uri).build();
 
     }

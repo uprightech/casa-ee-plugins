@@ -55,6 +55,7 @@ public class SocialLoginService {
         for (String externalUid : Optional.ofNullable(linked ? p.getOxExternalUid() : p.getOxUnlinkedExternalUids()).orElse(new String[0])) {
             if (externalUid.startsWith(OXEXTERNALUID_PREFIX)) {
                 int i = externalUid.indexOf(":");
+
                 if (i > OXEXTERNALUID_PREFIX.length()) {
                     String provider = externalUid.substring(OXEXTERNALUID_PREFIX.length(), i);
 
@@ -83,6 +84,9 @@ public class SocialLoginService {
         if (oxExternalUid != null) {
             List<String> unlinked = new ArrayList<>(Utils.listfromArray(p.getOxUnlinkedExternalUids()));
             unlinked.add(oxExternalUid);
+
+            logger.info("Linked accounts for {} will be {}", id, linked);
+            logger.info("Unlinked accounts for {} will be {}", id, unlinked);
             success = updateExternalIdentities(p, linked, unlinked);
         }
 
@@ -101,7 +105,10 @@ public class SocialLoginService {
 
         if (oxExternalUid != null) {
             List<String> linked = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
-            unlinked.add(oxExternalUid);
+            linked.add(oxExternalUid);
+
+            logger.info("Linked accounts for {} will be {}", id, linked);
+            logger.info("Unlinked accounts for {} will be {}", id, unlinked);
             success = updateExternalIdentities(p, linked, unlinked);
         }
 
@@ -114,6 +121,8 @@ public class SocialLoginService {
         ExternalIdentityPerson p = ldapService.get(ExternalIdentityPerson.class, ldapService.getPersonDn(id));
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
         list.add(String.format("passport-%s:%s", provider, externalId));
+        logger.info("Linked accounts for {} will be {}", id, list);
+
         p.setOxExternalUid(list.toArray(new String[0]));
         return ldapService.modify(p, ExternalIdentityPerson.class);
 
@@ -121,7 +130,9 @@ public class SocialLoginService {
 
     public boolean delete(String id, String provider) {
 
+        logger.info("Removing provider {} for {}", provider, id);
         ExternalIdentityPerson p = ldapService.get(ExternalIdentityPerson.class, ldapService.getPersonDn(id));
+
         List<String> linked = removeProvider(provider, p.getOxExternalUid()).getY();
         List<String> unlinked = removeProvider(provider, p.getOxUnlinkedExternalUids()).getY();
         return updateExternalIdentities(p, linked, unlinked);
@@ -133,11 +144,13 @@ public class SocialLoginService {
         try {
             providers = new ArrayList<>();
 
+            logger.debug("Reading DN of LDAP passport configuration");
             String dn = Files.newBufferedReader(OXLDAP_PATH).lines().filter(l -> l.startsWith(OXPASSPORT_PROPERTY))
                     .findFirst().map(l -> l.substring(OXPASSPORT_PROPERTY.length())).get();
             //skip uninteresting chars
             dn = dn.replaceFirst("[\\W]*=[\\W]*","");
 
+            logger.info("Loading social strategies info");
             oxPassportConfiguration passportConfig = ldapService.get(oxPassportConfiguration.class, dn);
 
             if (passportConfig != null) {
@@ -147,6 +160,8 @@ public class SocialLoginService {
                                 PassportConfiguration pcf = mapper.readValue(cfg, PassportConfiguration.class);
                                 Provider provider = new Provider();
                                 provider.setName(pcf.getStrategy());
+
+                                logger.info("Found provider {}", provider.getName());
                                 //Search the logo
                                 String logo = Optional.ofNullable(pcf.getFieldset()).orElse(Collections.emptyList()).stream()
                                         .filter(prop -> prop.getValue1().equals("logo_img")).map(SimpleCustomProperty::getValue2)
@@ -182,8 +197,10 @@ public class SocialLoginService {
         for (String externalUid : Optional.ofNullable(externalUids).orElse(new String[0])) {
             if (externalUid.startsWith(OXEXTERNALUID_PREFIX)) {
                 int i = externalUid.indexOf(":");
+
                 if (i > OXEXTERNALUID_PREFIX.length()) {
                     String prv = externalUid.substring(OXEXTERNALUID_PREFIX.length(), i);
+
                     if (prv.equals(provider)) {
                         oxExternalUid = externalUid;
                     } else {

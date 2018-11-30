@@ -25,7 +25,7 @@
                     </p>
                     <div class="alert alert-success dn" id="feedback-social" role="alert" />
 
-                    <h:div unless="${empty vm.providers}" class="pa3">
+                    <h:div unless="${empty vm.providers}" class="pa3 pb1">
 
                         <z:div sclass="flex items-center flex-column pt2 ph3-ns">
                             <table class="table table-sm">
