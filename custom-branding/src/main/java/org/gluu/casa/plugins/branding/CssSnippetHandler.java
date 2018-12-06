@@ -23,8 +23,8 @@ public class CssSnippetHandler {
     private static final String FOOTER_SELECTOR = "cust-footer-rule";
 
     private static final String PRIMARY_BUTTON_DEF_COLOR = "#FF80CC"; /* pink */
-    private static final String SECONDARY_BUTTON_DEF_COLOR = "#9EEBCF"; /* light-green */
-    private static final String TERTIARY_BUTTON_DEF_COLOR = "#96CCFF"; /* light-blue */
+    private static final String SECONDARY_BUTTON_DEF_COLOR = "#96CCFF"; /* light-blue */
+    private static final String TERTIARY_BUTTON_DEF_COLOR = "#9EEBCF"; /* light-green */
     private static final String HEADER_DEF_COLOR = "#FBF1A9" /* light yellow */;
 
     private String headerColor;
