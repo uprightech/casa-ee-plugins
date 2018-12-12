@@ -42,7 +42,7 @@
                     <z:div class="${css.panel}" visible="@load(vm.enforcementPolicies.contains('LOCATION_UNKNOWN') or vm.enforcementPolicies.contains('DEVICE_UNKNOWN'))">
 
                         <h3 class="f5 dark-blue2">${labels.trdevices.title}</h3>
-                        <h:p visible="@load(empty vm.trustedDevices)">${labels.trdevices.empty_}</h:p>
+                        <h:p visible="@load(empty vm.trustedDevices)">${labels.trdevices.none}</h:p>
 
                         <z:div visible="@load(not empty vm.trustedDevices)">
                             <p>${labels.trdevices.text}</p>
