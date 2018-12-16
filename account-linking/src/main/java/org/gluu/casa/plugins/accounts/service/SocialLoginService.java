@@ -1,6 +1,7 @@
 package org.gluu.casa.plugins.accounts.service;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.gluu.casa.misc.Utils;
 import org.gluu.casa.plugins.accounts.ldap.ExternalAccount;
 import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
@@ -13,6 +14,7 @@ import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.passport.PassportConfiguration;
 import org.zkoss.util.Pair;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,6 +32,7 @@ public class SocialLoginService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
+    //This has to be a codehaus mapper (see PassportConfiguration.class)
     private ObjectMapper mapper;
 
     private ILdapService ldapService;
@@ -140,17 +143,46 @@ public class SocialLoginService {
     }
 
     private void parseProviders() {
+        providers = new ArrayList<>();
+        providers.addAll(retrieveSAMLIDPs());
+        providers.addAll(retrieveSocialProviders());
+    }
 
+    private List<Provider> retrieveSAMLIDPs() {
+
+        List<Provider> providers = new ArrayList<>();
+        logger.info("Loading IDPs list");
         try {
-            providers = new ArrayList<>();
+            logger.debug("Parsing passport-saml-config.json");
+            byte[] bytes = Files.readAllBytes(Paths.get("/etc/gluu/conf/passport-saml-config.json"));
+            Map<String, Object> data = mapper.readValue(new String(bytes, StandardCharsets.UTF_8), new TypeReference<Map<String, Object>>(){});
 
+            for (String key : data.keySet()) {
+                Provider prv = new Provider();
+                prv.setName(key);
+
+                Object logo = ((Map<String, Object>) data.get(key)).get("logo_img");
+                Optional.ofNullable(logo).ifPresent( l -> prv.setLogo(l.toString()));
+                providers.add(prv);
+            }
+
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return providers;
+    }
+
+    private List<Provider> retrieveSocialProviders() {
+
+        List<Provider> providers = new ArrayList<>();
+        logger.info("Loading social strategies info");
+        try {
             logger.debug("Reading DN of LDAP passport configuration");
             String dn = Files.newBufferedReader(OXLDAP_PATH).lines().filter(l -> l.startsWith(OXPASSPORT_PROPERTY))
                     .findFirst().map(l -> l.substring(OXPASSPORT_PROPERTY.length())).get();
             //skip uninteresting chars
             dn = dn.replaceFirst("[\\W]*=[\\W]*","");
 
-            logger.info("Loading social strategies info");
             oxPassportConfiguration passportConfig = ldapService.get(oxPassportConfiguration.class, dn);
 
             if (passportConfig != null) {
@@ -182,6 +214,7 @@ public class SocialLoginService {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
+        return providers;
 
     }
 
