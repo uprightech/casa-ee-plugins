@@ -5,6 +5,7 @@ import org.gluu.casa.core.ldap.oxCustomScript;
 import org.gluu.casa.misc.Utils;
 import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
 import org.gluu.casa.plugins.accounts.pojo.LinkingSummary;
+import org.gluu.casa.plugins.accounts.pojo.PassportScriptProperties;
 import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
 import org.gluu.casa.service.ILdapService;
 import org.gluu.casa.service.ISessionContext;
@@ -25,6 +26,7 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,11 +41,7 @@ public class LinkingService {
 
     private ILdapService ldapService;
 
-    private String keyStoreFile;
-
-    private String keyStorePassword;
-
-    private String remoteUserNameAttribute;
+    private Map<String, PassportScriptProperties> passportProperties;
 
     @Context
     private UriInfo uriInfo;
@@ -55,16 +53,22 @@ public class LinkingService {
             mapper = new ObjectMapper();
             ldapService = Utils.managedBean(ILdapService.class);
 
-            oxCustomScript script = new oxCustomScript();
-            script.setDisplayName("passport_social");
-            script = ldapService.find(script, oxCustomScript.class, ldapService.getCustomScriptsDn()).get(0);
+            passportProperties = new HashMap<>();
+            for (String acr : AvailableProviders.ACRS) {
+                PassportScriptProperties psp = new PassportScriptProperties();
+                oxCustomScript script = new oxCustomScript();
+                script.setDisplayName(acr);
+                script = ldapService.find(script, oxCustomScript.class, ldapService.getCustomScriptsDn()).get(0);
 
-            Map<String, String> props = Utils.scriptConfigPropertiesAsMap(script);
-            keyStoreFile = props.get("key_store_file");
-            keyStorePassword = props.get("key_store_password");
+                Map<String, String> props = Utils.scriptConfigPropertiesAsMap(script);
+                psp.setKeyStoreFile(props.get("key_store_file"));
+                psp.setKeyStorePassword(props.get("key_store_password"));
 
-            int i = Utils.firstTrue(Arrays.asList(props.get("generic_local_attributes_list").split(",\\s*")), "uid"::equals);
-            remoteUserNameAttribute = i >= 0 ? props.get("generic_remote_attributes_list").split(",\\s*")[i] : "id";
+                int i = Utils.firstTrue(Arrays.asList(props.get("generic_local_attributes_list").split(",\\s*")), "uid"::equals);
+                psp.setRemoteUserNameAttribute(i >= 0 ? props.get("generic_remote_attributes_list").split(",\\s*")[i] : "id");
+
+                passportProperties.put(acr, psp);
+            }
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -92,11 +96,15 @@ public class LinkingService {
 
         try {
             if (PendingLinks.contains(userId, provider)) {
-                Jwt jwt = validateJWT(userJwt);
+                String acr = AvailableProviders.get().stream().filter(p -> p.getName().equals(provider)).findFirst().get().getAcr();
+                PassportScriptProperties psp = passportProperties.get(acr);
 
+                Jwt jwt = validateJWT(userJwt, psp);
                 if (jwt != null) {
                     logger.info("user profile JWT validated successfully\n{}", jwt);
                     String profile = jwt.getClaims().getClaimAsString("data");
+
+                    String remoteUserNameAttribute = psp.getRemoteUserNameAttribute();
                     String uid = mapper.readTree(profile).get(remoteUserNameAttribute).asText();
 
                     //Verify it's not already enrolled by someone
@@ -134,15 +142,15 @@ public class LinkingService {
 
     }
 
-    private Jwt validateJWT(String encodedJWT) {
+    private Jwt validateJWT(String encodedJWT, PassportScriptProperties properties) {
 
         try {
             //Verify JWT
             Jwt jwt = Jwt.parse(encodedJWT);
             AppConfiguration appCfg = new AppConfiguration();
             appCfg.setWebKeysStorage(WebKeyStorage.KEYSTORE);
-            appCfg.setKeyStoreFile(keyStoreFile);
-            appCfg.setKeyStoreSecret(keyStorePassword);
+            appCfg.setKeyStoreFile(properties.getKeyStoreFile());
+            appCfg.setKeyStoreSecret(properties.getKeyStorePassword());
 
             return CryptoProviderFactory.getCryptoProvider(appCfg).verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                     jwt.getHeader().getKeyId(), null, null, jwt.getHeader().getAlgorithm()) ? jwt : null;

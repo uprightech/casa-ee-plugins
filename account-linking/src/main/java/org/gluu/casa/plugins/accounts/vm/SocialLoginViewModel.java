@@ -4,6 +4,7 @@ import org.gluu.casa.plugins.accounts.ldap.ExternalAccount;
 import org.gluu.casa.plugins.accounts.pojo.LinkingSummary;
 import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
+import org.gluu.casa.plugins.accounts.service.AvailableProviders;
 import org.gluu.casa.plugins.accounts.service.SocialLoginService;
 import org.gluu.casa.service.ISessionContext;
 import org.gluu.casa.ui.UIUtils;
@@ -61,7 +62,7 @@ public class SocialLoginViewModel {
 
         userId = sessionContext.getLoggedUser().getId();
         slService = new SocialLoginService();
-        providers = slService.getAvailableProviders();
+        providers = AvailableProviders.get(true);
         parseLinkedAccounts();
 
         if (providers.size() > 0) {
