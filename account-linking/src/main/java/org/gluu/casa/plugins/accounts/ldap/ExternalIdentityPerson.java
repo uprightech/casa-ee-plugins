@@ -25,6 +25,10 @@ public class ExternalIdentityPerson extends BaseLdapPerson {
     @LDAPField(filterUsage=FilterUsage.ALWAYS_ALLOWED)
     private String[] oxUnlinkedExternalUids;
 
+    // The field used for optional attribute oxUnlinkedExternalUids.
+    @LDAPField(filterUsage=FilterUsage.ALWAYS_ALLOWED)
+    private String[] oxUidIDP;
+
     /**
      * Retrieves the values for the field associated with the
      * oxExternalUid attribute, if present.
@@ -36,6 +40,19 @@ public class ExternalIdentityPerson extends BaseLdapPerson {
     public String[] getOxExternalUid()
     {
         return oxExternalUid;
+    }
+
+    /**
+     * Retrieves the values for the field associated with the
+     * oxUidIDP attribute, if present.
+     *
+     * @return  The values for the field associated with the
+     *          oxUidIDP attribute, or
+     *          {@code null} if that attribute was not present in the entry.
+     */
+    public String[] getOxUidIDP()
+    {
+        return oxUidIDP;
     }
 
     /**
@@ -61,6 +78,18 @@ public class ExternalIdentityPerson extends BaseLdapPerson {
     public void setOxExternalUid(final String... v)
     {
         this.oxExternalUid = v;
+    }
+
+    /**
+     * Sets the values for the field associated with the
+     * oxUidIDP attribute.
+     *
+     * @param  v  The values for the field associated with the
+     *            oxUidIDP attribute.
+     */
+    public void setOxUidIDP(final String... v)
+    {
+        this.oxUidIDP = v;
     }
 
     /**
