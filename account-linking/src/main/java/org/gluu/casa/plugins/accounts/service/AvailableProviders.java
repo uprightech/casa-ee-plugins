@@ -5,6 +5,7 @@ import org.codehaus.jackson.type.TypeReference;
 import org.gluu.casa.misc.Utils;
 import org.gluu.casa.plugins.accounts.ldap.oxPassportConfiguration;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
+import org.gluu.casa.plugins.accounts.pojo.ProviderType;
 import org.gluu.casa.service.ILdapService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,6 @@ import java.util.stream.Stream;
  * @author jgomer
  */
 public class AvailableProviders {
-
-    private static final String SOCIAL_ACR = "passport_social";
-    private static final String SAML_ACR = "passport_saml";
-
-    public static final String[] ACRS = new String[]{SOCIAL_ACR, SAML_ACR};
 
     private static final Path OXLDAP_PATH = Paths.get("/etc/gluu/conf/ox-ldap.properties");
     private static final String OXPASSPORT_PROPERTY = "oxpassport_ConfigurationEntryDN";
@@ -58,6 +54,10 @@ public class AvailableProviders {
         return providers;
     }
 
+    public static Optional<Provider> getByName(String name) {
+        return providers.stream().filter(p -> p.getName().equals(name)).findFirst();
+    }
+
     private static List<Provider> retrieveProviders() {
 
         List<Provider> list = new ArrayList<>();
@@ -78,8 +78,9 @@ public class AvailableProviders {
 
             for (String key : data.keySet()) {
                 Provider prv = new Provider();
-                prv.setAcr(SAML_ACR);
+                prv.setType(ProviderType.SAML);
                 prv.setName(key);
+                logger.info("Found provider {}", key);
 
                 Object logo = ((Map<String, Object>) data.get(key)).get("logo_img");
                 Optional.ofNullable(logo).ifPresent(l -> prv.setLogo(l.toString()));
@@ -111,7 +112,7 @@ public class AvailableProviders {
                             try {
                                 PassportConfiguration pcf = mapper.readValue(cfg, PassportConfiguration.class);
                                 Provider provider = new Provider();
-                                provider.setAcr(SOCIAL_ACR);
+                                provider.setType(ProviderType.SOCIAL);
                                 provider.setName(pcf.getStrategy());
 
                                 logger.info("Found provider {}", provider.getName());

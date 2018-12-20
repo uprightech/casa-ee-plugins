@@ -7,6 +7,7 @@ import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
 import org.gluu.casa.plugins.accounts.pojo.LinkingSummary;
 import org.gluu.casa.plugins.accounts.pojo.PassportScriptProperties;
 import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
+import org.gluu.casa.plugins.accounts.pojo.ProviderType;
 import org.gluu.casa.service.ILdapService;
 import org.gluu.casa.service.ISessionContext;
 import org.slf4j.Logger;
@@ -25,9 +26,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author jgomer
@@ -41,7 +42,7 @@ public class LinkingService {
 
     private ILdapService ldapService;
 
-    private Map<String, PassportScriptProperties> passportProperties;
+    private Map<ProviderType, PassportScriptProperties> passportProperties;
 
     @Context
     private UriInfo uriInfo;
@@ -54,20 +55,25 @@ public class LinkingService {
             ldapService = Utils.managedBean(ILdapService.class);
 
             passportProperties = new HashMap<>();
-            for (String acr : AvailableProviders.ACRS) {
+            for (ProviderType pt : ProviderType.values()) {
+
                 PassportScriptProperties psp = new PassportScriptProperties();
                 oxCustomScript script = new oxCustomScript();
-                script.setDisplayName(acr);
-                script = ldapService.find(script, oxCustomScript.class, ldapService.getCustomScriptsDn()).get(0);
+                script.setDisplayName(pt.getAcr());
 
-                Map<String, String> props = Utils.scriptConfigPropertiesAsMap(script);
-                psp.setKeyStoreFile(props.get("key_store_file"));
-                psp.setKeyStorePassword(props.get("key_store_password"));
+                List<oxCustomScript> list = ldapService.find(script, oxCustomScript.class, ldapService.getCustomScriptsDn());
+                script = list.size() > 0  ? list.get(0) : null;
 
-                int i = Utils.firstTrue(Arrays.asList(props.get("generic_local_attributes_list").split(",\\s*")), "uid"::equals);
-                psp.setRemoteUserNameAttribute(i >= 0 ? props.get("generic_remote_attributes_list").split(",\\s*")[i] : "id");
+                if (script != null) {
+                    Map<String, String> props = Utils.scriptConfigPropertiesAsMap(script);
+                    psp.setKeyStoreFile(props.get("key_store_file"));
+                    psp.setKeyStorePassword(props.get("key_store_password"));
 
-                passportProperties.put(acr, psp);
+                    int i = Utils.firstTrue(Arrays.asList(props.get("generic_local_attributes_list").split(",\\s*")), "uid"::equals);
+                    psp.setRemoteUserNameAttribute(i >= 0 ? props.get("generic_remote_attributes_list").split(",\\s*")[i] : "id");
+
+                    passportProperties.put(pt, psp);
+                }
             }
 
         } catch (Exception e) {
@@ -96,8 +102,8 @@ public class LinkingService {
 
         try {
             if (PendingLinks.contains(userId, provider)) {
-                String acr = AvailableProviders.get().stream().filter(p -> p.getName().equals(provider)).findFirst().get().getAcr();
-                PassportScriptProperties psp = passportProperties.get(acr);
+                PassportScriptProperties psp = passportProperties.get(
+                        AvailableProviders.get().stream().filter(p -> p.getName().equals(provider)).findFirst().get().getType());
 
                 Jwt jwt = validateJWT(userJwt, psp);
                 if (jwt != null) {

@@ -5,7 +5,7 @@ import org.gluu.casa.plugins.accounts.pojo.LinkingSummary;
 import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 import org.gluu.casa.plugins.accounts.service.AvailableProviders;
-import org.gluu.casa.plugins.accounts.service.SocialLoginService;
+import org.gluu.casa.plugins.accounts.service.AccountLinkingService;
 import org.gluu.casa.service.ISessionContext;
 import org.gluu.casa.ui.UIUtils;
 import org.slf4j.Logger;
@@ -37,11 +37,11 @@ public class SocialLoginViewModel {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private Map<String, Pair<Boolean, String>> accounts;
+    private Map<Provider, Pair<Boolean, String>> accounts;
 
     private List<Provider> providers;
 
-    private SocialLoginService slService;
+    private AccountLinkingService slService;
 
     @WireVariable
     private ISessionContext sessionContext;
@@ -52,7 +52,7 @@ public class SocialLoginViewModel {
         return providers;
     }
 
-    public Map<String, Pair<Boolean, String>> getAccounts() {
+    public Map<Provider, Pair<Boolean, String>> getAccounts() {
         return accounts;
     }
 
@@ -61,7 +61,7 @@ public class SocialLoginViewModel {
         logger.debug("Initializing ViewModel");
 
         userId = sessionContext.getLoggedUser().getId();
-        slService = new SocialLoginService();
+        slService = new AccountLinkingService();
         providers = AvailableProviders.get(true);
         parseLinkedAccounts();
 
@@ -99,7 +99,7 @@ public class SocialLoginViewModel {
 
     @NotifyChange("providers")
     @Command
-    public void disable(@BindingParam("provider") String provider) {
+    public void disable(@BindingParam("provider") Provider provider) {
 
         boolean succ = slService.unlink(userId, provider);
         if (succ) {
@@ -111,7 +111,7 @@ public class SocialLoginViewModel {
 
     @NotifyChange("providers")
     @Command
-    public void enable(@BindingParam("provider") String provider) {
+    public void enable(@BindingParam("provider") Provider provider) {
 
         boolean succ = slService.enableLink(userId, provider);
         if (succ) {
@@ -122,7 +122,7 @@ public class SocialLoginViewModel {
     }
 
     @Command
-    public void remove(@BindingParam("provider") String provider) {
+    public void remove(@BindingParam("provider") Provider provider) {
 
         Messagebox.show(Labels.getLabel("sociallogin.remove_hint"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
                 event -> {
@@ -130,7 +130,7 @@ public class SocialLoginViewModel {
 
                         if (slService.delete(userId, provider)) {
                             parseLinkedAccounts();
-                            UIUtils.showMessageUI(true, Labels.getLabel("sociallogin.removed_link", new String[]{provider}));
+                            UIUtils.showMessageUI(true, Labels.getLabel("sociallogin.removed_link", new String[]{provider.getName()}));
                             BindUtils.postNotifyChange(null, null, SocialLoginViewModel.this, "providers");
                         } else {
                             UIUtils.showMessageUI(false);

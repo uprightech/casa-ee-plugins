@@ -1,5 +1,9 @@
 package org.gluu.casa.plugins.accounts.pojo;
 
+import org.gluu.casa.plugins.accounts.service.enrollment.ProviderEnrollmentManager;
+import org.gluu.casa.plugins.accounts.service.enrollment.SamlEnrollmentManager;
+import org.gluu.casa.plugins.accounts.service.enrollment.SocialEnrollmentManager;
+
 /**
  * @author jgomer
  */
@@ -7,7 +11,7 @@ public class Provider {
 
     private String logo;
     private String name;
-    private String acr;
+    private ProviderType type;
 
     public String getName() {
         return name;
@@ -17,8 +21,8 @@ public class Provider {
         return logo;
     }
 
-    public String getAcr() {
-        return acr;
+    public ProviderType getType() {
+        return type;
     }
 
     public void setLogo(String logo) {
@@ -29,8 +33,25 @@ public class Provider {
         this.name = name;
     }
 
-    public void setAcr(String acr) {
-        this.acr = acr;
+    public void setType(ProviderType type) {
+        this.type = type;
+    }
+
+    public ProviderEnrollmentManager getEnrollmentManager() {
+
+        ProviderEnrollmentManager em = null;
+        if (type != null) {
+            switch (type) {
+                case SAML:
+                    em = new SamlEnrollmentManager(this);
+                    break;
+                case SOCIAL:
+                    em = new SocialEnrollmentManager(this);
+                    break;
+            }
+        }
+        return em;
+
     }
 
 }

@@ -1,14 +1,16 @@
 package org.gluu.casa.plugins.accounts.ldap;
 
+import org.gluu.casa.plugins.accounts.pojo.Provider;
+
 /**
  * @author jgomer
  */
 public class ExternalAccount {
 
-    private String provider;
+    private Provider provider;
     private String uid;
 
-    public String getProvider() {
+    public Provider getProvider() {
         return provider;
     }
 
@@ -16,7 +18,7 @@ public class ExternalAccount {
         return uid;
     }
 
-    public void setProvider(String provider) {
+    public void setProvider(Provider provider) {
         this.provider = provider;
     }
 
