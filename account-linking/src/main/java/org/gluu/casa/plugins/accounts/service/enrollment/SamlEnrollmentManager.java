@@ -4,10 +4,7 @@ import org.gluu.casa.misc.Utils;
 import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author jgomer
@@ -57,67 +54,69 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
 
     public boolean unlink(ExternalIdentityPerson p) {
 
-        List<String> uids = removeProvider(p, provider);
+        String uid = removeProvider(p, provider);
+        if (uid == null) {
+            return false;
+        }
 
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxUnlinkedExternalUids()));
-        uids.forEach(uid -> list.add(String.format("passport-saml:%s", uid)));
+        list.add(String.format("passport-saml:%s", uid));
         p.setOxUnlinkedExternalUids(list.toArray(new String[0]));
 
-        addUidIDP(p, uids);
+        addUidIDP(p, uid);
         return updatePerson(p);
 
     }
 
     public boolean enable(ExternalIdentityPerson p) {
 
-        List<String> uids = removeProvider(p, provider);
+        String uid = removeProvider(p, provider);
+        if (uid == null) {
+            return false;
+        }
 
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
-        uids.forEach(uid -> list.add(String.format("passport-saml:%s", uid)));
+        list.add(String.format("passport-saml:%s", uid));
         p.setOxExternalUid(list.toArray(new String[0]));
 
-        addUidIDP(p, uids);
+        addUidIDP(p, uid);
         return updatePerson(p);
 
     }
 
-    private void addUidIDP(ExternalIdentityPerson p, List<String> uids) {
+    private void addUidIDP(ExternalIdentityPerson p, String uid) {
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxUidIDP()));
-        uids.forEach(uid -> list.add(String.format("%s:%s", uid, provider.getName())));
+        list.add(String.format("%s:%s", uid, provider.getName()));
         p.setOxUidIDP(list.toArray(new String[0]));
     }
 
-    private static List<String> removeProvider(ExternalIdentityPerson p, Provider provider) {
+    private static String removeProvider(ExternalIdentityPerson p, Provider provider) {
 
-        List<String> externalUids = new ArrayList<>();
+        String externalUid = null;
         String[] array = p.getOxUidIDP();
         if (Utils.isNotEmpty(array)) {
 
-            Set<Integer> removals = new HashSet<>();
-
+            int removal = -1;
             for (int i = 0; i < array.length; i++) {
                 String str = array[i];
                 int j = str.indexOf(":");
 
                 if (j > 0 && str.substring(j+1).equals(provider.getName())) {
-                    externalUids.add(str.substring(0, j));
-                    removals.add(i);
+                    externalUid = str.substring(0, j);
+                    removal = i;
+                    break;
                 }
             }
 
-            List<String> newUidIDP = new ArrayList<>();
-            for (int i = 0; i < array.length; i++) {
-                if (!removals.contains(i)) {
-                    newUidIDP.add(array[i]);
-                }
-            }
-
+            List<String> newUidIDP = new ArrayList<>(Arrays.asList(array));
             Set<String> newExternalUids = new HashSet<>(Utils.listfromArray(p.getOxExternalUid()));
             Set<String> newUnlinkedUIds = new HashSet<>(Utils.listfromArray(p.getOxUnlinkedExternalUids()));
-            for (String uid : externalUids) {
-                String str = String.format("passport-saml:%s", uid);
+
+            if (externalUid != null) {
+                String str = String.format("passport-saml:%s", externalUid);
                 newExternalUids.remove(str);
                 newUnlinkedUIds.remove(str);
+                newUidIDP.remove(removal);
             }
 
             p.setOxExternalUid(newExternalUids.toArray(new String[0]));
@@ -125,7 +124,7 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
             p.setOxUidIDP(newUidIDP.toArray(new String[0]));
         }
 
-        return externalUids;
+        return externalUid;
 
     }
 

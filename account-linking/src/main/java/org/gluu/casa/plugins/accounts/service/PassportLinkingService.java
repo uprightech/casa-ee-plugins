@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * @author jgomer
  */
 @Path("/idp-linking")
-public class LinkingService {
+public class PassportLinkingService {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -47,10 +47,10 @@ public class LinkingService {
     @Context
     private UriInfo uriInfo;
 
-    public LinkingService() {
+    public PassportLinkingService() {
 
         try {
-            logger.info("Creating an instance of LinkingService");
+            logger.info("Creating an instance of PassportLinkingService");
             mapper = new ObjectMapper();
             ldapService = Utils.managedBean(ILdapService.class);
 
