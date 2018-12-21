@@ -124,4 +124,10 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
         return updatePerson(p);
     }
 
+    public boolean isAssigned(String uid) {
+        ExternalIdentityPerson p = new ExternalIdentityPerson();
+        p.setOxExternalUid(String.format("passport-%s:%s", provider, uid));
+        return ldapService.find(p, ExternalIdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
+    }
+
 }

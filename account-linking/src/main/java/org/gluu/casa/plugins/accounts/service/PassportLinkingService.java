@@ -3,11 +3,7 @@ package org.gluu.casa.plugins.accounts.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.gluu.casa.core.ldap.oxCustomScript;
 import org.gluu.casa.misc.Utils;
-import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
-import org.gluu.casa.plugins.accounts.pojo.LinkingSummary;
-import org.gluu.casa.plugins.accounts.pojo.PassportScriptProperties;
-import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
-import org.gluu.casa.plugins.accounts.pojo.ProviderType;
+import org.gluu.casa.plugins.accounts.pojo.*;
 import org.gluu.casa.service.ILdapService;
 import org.gluu.casa.service.ISessionContext;
 import org.slf4j.Logger;
@@ -27,8 +23,6 @@ import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author jgomer
@@ -102,8 +96,8 @@ public class PassportLinkingService {
 
         try {
             if (PendingLinks.contains(userId, provider)) {
-                PassportScriptProperties psp = passportProperties.get(
-                        AvailableProviders.get().stream().filter(p -> p.getName().equals(provider)).findFirst().get().getType());
+                Provider prv = AvailableProviders.get().stream().filter(p -> p.getName().equals(provider)).findFirst().get();
+                PassportScriptProperties psp = passportProperties.get(prv.getType());
 
                 Jwt jwt = validateJWT(userJwt, psp);
                 if (jwt != null) {
@@ -114,7 +108,7 @@ public class PassportLinkingService {
                     String uid = mapper.readTree(profile).get(remoteUserNameAttribute).asText();
 
                     //Verify it's not already enrolled by someone
-                    if (!alreadyAssigned(provider, uid)) {
+                    if (!prv.getEnrollmentManager().isAssigned(uid)) {
                         summary.setProvider(provider);
                         summary.setUid(uid);
                     } else {
@@ -164,15 +158,6 @@ public class PassportLinkingService {
             logger.error(e.getMessage(), e);
             return null;
         }
-
-    }
-
-    private boolean alreadyAssigned(String provider, String uid) {
-
-        String value = String.format("passport-%s:%s", provider, uid);
-        ExternalIdentityPerson p = new ExternalIdentityPerson();
-        p.setOxExternalUid(value);
-        return ldapService.find(p, ExternalIdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
 
     }
 

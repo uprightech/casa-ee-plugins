@@ -128,4 +128,10 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
+    public boolean isAssigned(String uid) {
+        ExternalIdentityPerson p = new ExternalIdentityPerson();
+        p.setOxUidIDP(String.format("%s:%s", uid, provider.getName()));
+        return ldapService.find(p, ExternalIdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
+    }
+
 }

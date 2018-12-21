@@ -16,5 +16,6 @@ public interface ProviderEnrollmentManager {
     boolean remove(ExternalIdentityPerson p);
     boolean unlink(ExternalIdentityPerson p);
     boolean enable(ExternalIdentityPerson p);
+    boolean isAssigned(String uid);
 
 }

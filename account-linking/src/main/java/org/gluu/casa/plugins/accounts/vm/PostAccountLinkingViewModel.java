@@ -53,8 +53,8 @@ public class PostAccountLinkingViewModel {
 
                 if (uid != null) {
                     logger.warn("Notifying linking page...");
-                    EventQueues.lookup(SocialLoginViewModel.SOCIAL_LINK_QUEUE, EventQueues.SESSION, true)
-                            .publish(new Event(SocialLoginViewModel.EVENT_NAME, null, summary));
+                    EventQueues.lookup(AccountLinkingViewModel.SOCIAL_LINK_QUEUE, EventQueues.SESSION, true)
+                            .publish(new Event(AccountLinkingViewModel.EVENT_NAME, null, summary));
 
                     title = Labels.getLabel("sociallogin.linking_result.success");
                     text = Labels.getLabel("sociallogin.linking_result.success_close");

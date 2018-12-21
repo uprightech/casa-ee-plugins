@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @author jgomer
  */
-public class SocialLoginViewModel {
+public class AccountLinkingViewModel {
 
     public static final String SOCIAL_LINK_QUEUE="social_queue";
 
@@ -45,6 +45,8 @@ public class SocialLoginViewModel {
 
     @WireVariable
     private ISessionContext sessionContext;
+
+    private int linkedTotal;
 
     private String userId;
 
@@ -79,7 +81,7 @@ public class SocialLoginViewModel {
                             //Linking in social network was successful
                             if (slService.link(userId, provider, summary.getUid())) {
                                 parseLinkedAccounts();
-                                BindUtils.postNotifyChange(null, null, SocialLoginViewModel.this, "providers");
+                                BindUtils.postNotifyChange(null, null, AccountLinkingViewModel.this, "providers");
                             }
                         }
                     });
@@ -131,7 +133,7 @@ public class SocialLoginViewModel {
                         if (slService.delete(userId, provider)) {
                             parseLinkedAccounts();
                             UIUtils.showMessageUI(true, Labels.getLabel("sociallogin.removed_link", new String[]{provider.getName()}));
-                            BindUtils.postNotifyChange(null, null, SocialLoginViewModel.this, "providers");
+                            BindUtils.postNotifyChange(null, null, AccountLinkingViewModel.this, "providers");
                         } else {
                             UIUtils.showMessageUI(false);
                         }
@@ -147,6 +149,7 @@ public class SocialLoginViewModel {
         List<ExternalAccount> unlinked = slService.getAccounts(userId, false);
 
         accounts = new HashMap<>();
+        linkedTotal = linked.size();
         linked.forEach(acc -> accounts.put(acc.getProvider(), new Pair<>(true, acc.getUid())));
         unlinked.forEach(acc -> accounts.put(acc.getProvider(), new Pair<>(false, acc.getUid())));
 
