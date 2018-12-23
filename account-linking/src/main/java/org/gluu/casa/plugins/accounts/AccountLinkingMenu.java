@@ -8,7 +8,7 @@ import org.pf4j.Extension;
  * @author jgomer
  */
 @Extension
-public class SocialLoginMenu implements NavigationMenu {
+public class AccountLinkingMenu implements NavigationMenu {
 
     public String getContentsUrl() {
         return "menu.zul";

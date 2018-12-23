@@ -6,6 +6,7 @@ import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 import org.gluu.casa.plugins.accounts.service.AvailableProviders;
 import org.gluu.casa.plugins.accounts.service.AccountLinkingService;
+import org.gluu.casa.plugins.accounts.service.password.PasswordService;
 import org.gluu.casa.service.ISessionContext;
 import org.gluu.casa.ui.UIUtils;
 import org.slf4j.Logger;
@@ -43,6 +44,8 @@ public class AccountLinkingViewModel {
 
     private AccountLinkingService slService;
 
+    private PasswordService pwdService;
+
     @WireVariable
     private ISessionContext sessionContext;
 
@@ -64,6 +67,7 @@ public class AccountLinkingViewModel {
 
         userId = sessionContext.getLoggedUser().getId();
         slService = new AccountLinkingService();
+        pwdService = new PasswordService();
         providers = AvailableProviders.get(true);
         parseLinkedAccounts();
 
@@ -103,11 +107,15 @@ public class AccountLinkingViewModel {
     @Command
     public void disable(@BindingParam("provider") Provider provider) {
 
-        boolean succ = slService.unlink(userId, provider);
-        if (succ) {
-            parseLinkedAccounts();
+        if (linkedTotal > 1 || pwdService.hasPassword(userId)) {
+            boolean succ = slService.unlink(userId, provider);
+            if (succ) {
+                parseLinkedAccounts();
+            }
+            UIUtils.showMessageUI(succ);
+        } else {
+            Messagebox.show(Labels.getLabel("sociallogin.linking_pass_needed"), null, Messagebox.OK, Messagebox.INFORMATION);
         }
-        UIUtils.showMessageUI(succ);
 
     }
 
@@ -126,19 +134,23 @@ public class AccountLinkingViewModel {
     @Command
     public void remove(@BindingParam("provider") Provider provider) {
 
-        Messagebox.show(Labels.getLabel("sociallogin.remove_hint"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
-                event -> {
-                    if (Messagebox.ON_YES.equals(event.getName())) {
+        if (linkedTotal > 1 || pwdService.hasPassword(userId)) {
+            Messagebox.show(Labels.getLabel("sociallogin.remove_hint"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
+                    event -> {
+                        if (Messagebox.ON_YES.equals(event.getName())) {
 
-                        if (slService.delete(userId, provider)) {
-                            parseLinkedAccounts();
-                            UIUtils.showMessageUI(true, Labels.getLabel("sociallogin.removed_link", new String[]{provider.getName()}));
-                            BindUtils.postNotifyChange(null, null, AccountLinkingViewModel.this, "providers");
-                        } else {
-                            UIUtils.showMessageUI(false);
+                            if (slService.delete(userId, provider)) {
+                                parseLinkedAccounts();
+                                UIUtils.showMessageUI(true, Labels.getLabel("sociallogin.removed_link", new String[]{provider.getName()}));
+                                BindUtils.postNotifyChange(null, null, AccountLinkingViewModel.this, "providers");
+                            } else {
+                                UIUtils.showMessageUI(false);
+                            }
                         }
-                    }
-                });
+                    });
+        } else {
+            Messagebox.show(Labels.getLabel("sociallogin.linking_pass_needed"), null, Messagebox.OK, Messagebox.INFORMATION);
+        }
 
     }
 

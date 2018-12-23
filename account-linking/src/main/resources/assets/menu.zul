@@ -1,4 +1,4 @@
-<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native" xmlns:h="xhtml">
 
     <li>
         <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/" data-priority="${priority}">
@@ -6,5 +6,19 @@
             <span class="collapsible-menu-item di">${labels.sociallogin.title}</span>
         </a>
     </li>
+
+    <h:li viewModel="@id('vm') @init('org.gluu.casa.plugins.accounts.vm.PasswordViewModel')" if="@load(vm.passwordLess)">
+        <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/pass-set.zul" data-priority="${priority}">
+            <i class="mh2 fas fa-lock" />
+            <span class="collapsible-menu-item di">${labels.password_set.title}</span>
+        </a>
+        <script>
+            try {
+                /* hide pass reset */
+                $("#pass_reset_menuitem").remove();
+            } catch (e) {
+            }
+        </script>
+    </h:li>
 
 </z:zk>
