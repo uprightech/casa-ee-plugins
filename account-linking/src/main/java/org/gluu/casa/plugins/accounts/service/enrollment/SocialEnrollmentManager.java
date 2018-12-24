@@ -40,7 +40,7 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
 
     public boolean link(ExternalIdentityPerson p, String externalId) {
         Set<String> set = new HashSet<>(Utils.listfromArray(p.getOxExternalUid()));
-        set.add(String.format("passport-%s:%s", provider.getName(), externalId));
+        set.add(getFormatedAttributeVal(externalId));
         logger.info("Linked accounts for {} will be {}", p.getUid(), set);
 
         p.setOxExternalUid(set.toArray(new String[0]));
@@ -126,8 +126,12 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
 
     public boolean isAssigned(String uid) {
         ExternalIdentityPerson p = new ExternalIdentityPerson();
-        p.setOxExternalUid(String.format("passport-%s:%s", provider, uid));
+        p.setOxExternalUid(getFormatedAttributeVal(uid));
         return ldapService.find(p, ExternalIdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
+    }
+
+    private String getFormatedAttributeVal(String uid) {
+        return String.format("passport-%s:%s", provider.getName(), uid);
     }
 
 }
