@@ -276,7 +276,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return page
 
-        return ""
+        return "casa.xhtml"
 
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
@@ -685,6 +685,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     for field in strategy.getFieldset():
                         if StringHelper.equalsIgnoreCase(field.getValue1(), property):
                             registeredProviders[provider][property] = field.getValue2()
+                            break
                             
                     if not property in registeredProviders[provider]:
                         registeredProviders[provider][property] = "img/%s.png" % provider
@@ -710,8 +711,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     registeredProviders[provider] = { "saml" : True }
                     
                     property = "logo_img"
-                    if property in providerCfg:
-                        registeredProviders[provider][property] = providerCfg[property]
+                    registeredProviders[provider][property] = providerCfg[property] if property in providerCfg else ""
                     
         except:
             print "Casa. parseSAMLProviders. An error occurred while building the list of supported SAML authentication providers", sys.exc_info()[1]
