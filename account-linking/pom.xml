@@ -42,7 +42,7 @@
                             <Plugin-Id>${plugin.id}</Plugin-Id>
                             <Plugin-Version>${plugin.version}</Plugin-Version>
                             <Plugin-Provider>Gluu Inc.</Plugin-Provider>
-                            <Plugin-Class>org.gluu.casa.plugins.accounts.SocialLoginPlugin</Plugin-Class>
+                            <Plugin-Class>org.gluu.casa.plugins.accounts.AccountLinkingPlugin</Plugin-Class>
                             <Plugin-Description>
                                 This plugin allows users to associate accounts used in third party sites with their local
                                 Gluu account. Your Gluu installation needs Passport component configured and running to

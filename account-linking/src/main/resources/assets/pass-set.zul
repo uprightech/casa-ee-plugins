@@ -63,6 +63,10 @@
                 $(icon).toggleClass('fa-eye-slash').toggleClass('fa-eye');
                 $('#' + elemID).togglePassword();
             }
+
+            function redirectTo(relativeUrl) {
+                window.location.pathname = relativeUrl;
+            }
         </script>
     </z:div>
 

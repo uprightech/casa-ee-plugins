@@ -77,14 +77,19 @@ public class AvailableProviders {
             Map<String, Object> data = mapper.readValue(new String(bytes, StandardCharsets.UTF_8), new TypeReference<Map<String, Object>>(){});
 
             for (String key : data.keySet()) {
-                Provider prv = new Provider();
-                prv.setType(ProviderType.SAML);
-                prv.setName(key);
-                logger.info("Found provider {}", key);
+                Map<String, Object> props = (Map<String, Object>) data.get(key);
 
-                Object logo = ((Map<String, Object>) data.get(key)).get("logo_img");
-                Optional.ofNullable(logo).ifPresent(l -> prv.setLogo(l.toString()));
-                providers.add(prv);
+                if (Optional.ofNullable(props.get("enable")).map(val -> Boolean.valueOf(val.toString())).orElse(false)) {
+                    logger.info("Found provider {}", key);
+
+                    Provider prv = new Provider();
+                    prv.setType(ProviderType.SAML);
+                    prv.setName(key);
+
+                    Object logo = props.get("logo_img");
+                    Optional.ofNullable(logo).ifPresent(l -> prv.setLogo(l.toString()));
+                    providers.add(prv);
+                }
             }
 
         } catch (Exception e) {

@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.*;
 import org.zkoss.util.resource.Labels;
+import org.zkoss.zk.au.out.AuInvoke;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.select.Selectors;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Messagebox;
 
 import java.util.stream.Stream;
@@ -34,6 +36,7 @@ public class PasswordViewModel {
     private String newPasswordConfirm;
     private int strength;
     private boolean passwordLess;
+    private String contextPath;
 
     private User user;
     PasswordService ps;
@@ -74,9 +77,10 @@ public class PasswordViewModel {
     @Init
     public void init() {
         resetPassSettings();
-        ps = new PasswordService();
         user = sessionContext.getLoggedUser();
+        ps = new PasswordService();
         passwordLess = !ps.hasPassword(user.getId());
+        contextPath = WebUtils.getServletRequest().getContextPath();
     }
 
     @AfterCompose
@@ -98,20 +102,28 @@ public class PasswordViewModel {
     @Command
     public void setPass() {
 
-        if (Stream.of(newPassword, newPasswordConfirm).noneMatch(Utils::isEmpty) && newPasswordConfirm.equals(newPassword)) {
-            if (ps.setPassword(user.getId(), newPassword)) {
-                passwordLess = false;
-                String userName = user.getUserName();
-                resetPassSettings();
-                Messagebox.show(Labels.getLabel("password_set.success", new String[]{userName}), null, Messagebox.OK, Messagebox.INFORMATION,
-                        event -> {
-                            if (Messagebox.ON_OK.equals(event.getName())) {
-                                WebUtils.execRedirect("/index.zul");
-                                //After redirecting this page will be inaccessible, but password reset menu will be shown
-                            }
-                        });
+        if (Stream.of(newPassword, newPasswordConfirm).noneMatch(Utils::isEmpty)) {
+            if (newPasswordConfirm.equals(newPassword)) {
+
+                if (ps.setPassword(user.getId(), newPassword)) {
+                    passwordLess = false;
+                    String userName = user.getUserName();
+                    resetPassSettings();
+                    Messagebox.show(Labels.getLabel("password_set.success", new String[]{userName}), null, Messagebox.OK, Messagebox.INFORMATION,
+                            event -> {
+                                if (Messagebox.ON_OK.equals(event.getName())) {
+                                    //WebUtils.execRedirect(contextPath + "/user.zul");
+                                    //Make redirect in Javascript, using HTTP redirect here behaves abnormally
+                                    Clients.response(new AuInvoke("redirectTo", contextPath + "/user.zul"));
+                                    //After redirecting this page will be inaccessible, but password reset menu will be shown
+                                }
+                            });
+                } else {
+                    UIUtils.showMessageUI(false);
+                }
             } else {
-                UIUtils.showMessageUI(false);
+                resetPassSettings();
+                UIUtils.showMessageUI(false, Labels.getLabel("usr.passreset_nomatch"));
             }
         }
 

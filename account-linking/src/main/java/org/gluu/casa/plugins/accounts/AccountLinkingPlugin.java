@@ -6,9 +6,9 @@ import org.pf4j.PluginWrapper;
 /**
  * @author jgomer
  */
-public class SocialLoginPlugin extends Plugin {
+public class AccountLinkingPlugin extends Plugin {
 
-    public SocialLoginPlugin(PluginWrapper wrapper) {
+    public AccountLinkingPlugin(PluginWrapper wrapper) {
         super(wrapper);
     }
 
