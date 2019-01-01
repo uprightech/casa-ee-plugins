@@ -45,8 +45,11 @@ public class StrongAuthnSettingsPlugin extends Plugin {
             method = getAMethod("setTrustedDevicesSettings", clazz);
             method.invoke(settings, new Object[]{null});
 
+            Class<?> epcls = Class.forName("org.gluu.casa.conf.sndfactor.EnforcementPolicy");
+            Object epclsInstance = epcls.cast(getAMethod("valueOf", epcls).invoke(epcls,"EVERY_LOGIN"));
+
             method = getAMethod("setEnforcement2FA", clazz);
-            method.invoke(settings, Collections.emptyList());
+            method.invoke(settings, Collections.singletonList(epclsInstance));
 
             method = getAMethod("save", clazz);
             method.invoke(settings);
