@@ -1,7 +1,7 @@
 package org.gluu.casa.plugins.accounts.service.enrollment;
 
+import org.gluu.casa.core.ldap.IdentityPerson;
 import org.gluu.casa.misc.Utils;
-import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 import org.zkoss.util.Pair;
 
@@ -18,7 +18,7 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
         super(provider);
     }
 
-    public String getUid(ExternalIdentityPerson p, boolean linked) {
+    public String getUid(IdentityPerson p, boolean linked) {
 
         List<String> list = Utils.listfromArray(linked ? p.getOxExternalUid() : p.getOxUnlinkedExternalUids());
         for (String externalUid : list) {
@@ -38,7 +38,7 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
-    public boolean link(ExternalIdentityPerson p, String externalId) {
+    public boolean link(IdentityPerson p, String externalId) {
         Set<String> set = new HashSet<>(Utils.listfromArray(p.getOxExternalUid()));
         set.add(getFormatedAttributeVal(externalId));
         logger.info("Linked accounts for {} will be {}", p.getUid(), set);
@@ -47,14 +47,14 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
         return updatePerson(p);
     }
 
-    public boolean remove(ExternalIdentityPerson p) {
+    public boolean remove(IdentityPerson p) {
         logger.info("Removing provider {} for {}", provider.getName(), p.getUid());
         List<String> linked = removeProvider(provider, p.getOxExternalUid()).getY();
         List<String> unlinked = removeProvider(provider, p.getOxUnlinkedExternalUids()).getY();
         return updateExternalIdentities(p, linked, unlinked);
     }
 
-    public boolean unlink(ExternalIdentityPerson p) {
+    public boolean unlink(IdentityPerson p) {
 
         boolean success = false;
         Pair<String, List<String>> tmp = removeProvider(provider, p.getOxExternalUid());
@@ -74,7 +74,7 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
-    public boolean enable(ExternalIdentityPerson p) {
+    public boolean enable(IdentityPerson p) {
 
         boolean success = false;
         Pair<String, List<String>> tmp = removeProvider(provider, p.getOxUnlinkedExternalUids());
@@ -118,16 +118,16 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
-    private boolean updateExternalIdentities(ExternalIdentityPerson p, List<String> linked, List<String> unlinked) {
+    private boolean updateExternalIdentities(IdentityPerson p, List<String> linked, List<String> unlinked) {
         p.setOxExternalUid(linked.toArray(new String[0]));
         p.setOxUnlinkedExternalUids(unlinked.toArray(new String[0]));
         return updatePerson(p);
     }
 
     public boolean isAssigned(String uid) {
-        ExternalIdentityPerson p = new ExternalIdentityPerson();
+        IdentityPerson p = new IdentityPerson();
         p.setOxExternalUid(getFormatedAttributeVal(uid));
-        return ldapService.find(p, ExternalIdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
+        return ldapService.find(p, IdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
     }
 
     private String getFormatedAttributeVal(String uid) {

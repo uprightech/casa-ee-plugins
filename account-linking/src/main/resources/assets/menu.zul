@@ -7,20 +7,4 @@
         </a>
     </li>
 
-    <z:div viewModel="@id('myVM') @init('org.gluu.casa.plugins.accounts.vm.PasswordViewModel')">
-        <h:li if="${myVM.passwordLess}">
-            <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/pass-set.zul" data-priority="${priority}">
-                <i class="mh2 fas fa-lock" />
-                <span class="collapsible-menu-item di">${labels.password_set.title}</span>
-            </a>
-            <script>
-                try {
-                /* hide pass reset */
-                $("#pass_reset_menuitem").remove();
-                } catch (e) {
-                }
-            </script>
-        </h:li>
-    </z:div>
-
 </z:zk>

@@ -1,7 +1,7 @@
 package org.gluu.casa.plugins.accounts.service.enrollment;
 
+import org.gluu.casa.core.ldap.IdentityPerson;
 import org.gluu.casa.misc.Utils;
-import org.gluu.casa.plugins.accounts.ldap.ExternalIdentityPerson;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 
 import java.util.*;
@@ -17,7 +17,7 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
         super(provider);
     }
 
-    public String getUid(ExternalIdentityPerson p, boolean linked) {
+    public String getUid(IdentityPerson p, boolean linked) {
 
         List<String> list = Utils.listfromArray(linked ? p.getOxExternalUid() : p.getOxUnlinkedExternalUids());
         for (String externalUid : list) {
@@ -36,7 +36,7 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
-    public boolean link(ExternalIdentityPerson p, String externalId) {
+    public boolean link(IdentityPerson p, String externalId) {
 
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
         list.add(getFormatedAttributeVal(externalId));
@@ -47,12 +47,12 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
-    public boolean remove(ExternalIdentityPerson p) {
+    public boolean remove(IdentityPerson p) {
         removeProvider(p);
         return updatePerson(p);
     }
 
-    public boolean unlink(ExternalIdentityPerson p) {
+    public boolean unlink(IdentityPerson p) {
 
         String uid = removeProvider(p);
         if (uid == null) {
@@ -66,7 +66,7 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
-    public boolean enable(ExternalIdentityPerson p) {
+    public boolean enable(IdentityPerson p) {
 
         String uid = removeProvider(p);
         if (uid == null) {
@@ -80,7 +80,7 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
 
     }
 
-    private String removeProvider(ExternalIdentityPerson p) {
+    private String removeProvider(IdentityPerson p) {
 
         String externalUid = null;
         String pattern = String.format("%s%s:",OXEXTERNALUID_PREFIX, provider.getName());
@@ -115,9 +115,9 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
     }
 
     public boolean isAssigned(String uid) {
-        ExternalIdentityPerson p = new ExternalIdentityPerson();
+        IdentityPerson p = new IdentityPerson();
         p.setOxExternalUid(getFormatedAttributeVal(uid));
-        return ldapService.find(p, ExternalIdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
+        return ldapService.find(p, IdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
     }
 
     private String getFormatedAttributeVal(String uid) {

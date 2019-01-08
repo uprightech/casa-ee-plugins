@@ -1,6 +1,4 @@
-package org.gluu.casa.plugins.accounts.ldap;
-
-import org.gluu.casa.plugins.accounts.pojo.Provider;
+package org.gluu.casa.plugins.accounts.pojo;
 
 /**
  * @author jgomer

@@ -1,12 +1,11 @@
 package org.gluu.casa.plugins.accounts.vm;
 
-import org.gluu.casa.plugins.accounts.ldap.ExternalAccount;
+import org.gluu.casa.plugins.accounts.pojo.ExternalAccount;
 import org.gluu.casa.plugins.accounts.pojo.LinkingSummary;
 import org.gluu.casa.plugins.accounts.pojo.PendingLinks;
 import org.gluu.casa.plugins.accounts.pojo.Provider;
 import org.gluu.casa.plugins.accounts.service.AvailableProviders;
 import org.gluu.casa.plugins.accounts.service.AccountLinkingService;
-import org.gluu.casa.plugins.accounts.service.password.PasswordService;
 import org.gluu.casa.service.ISessionContext;
 import org.gluu.casa.ui.UIUtils;
 import org.slf4j.Logger;
@@ -44,8 +43,6 @@ public class AccountLinkingViewModel {
 
     private AccountLinkingService slService;
 
-    private PasswordService pwdService;
-
     @WireVariable
     private ISessionContext sessionContext;
 
@@ -67,7 +64,6 @@ public class AccountLinkingViewModel {
 
         userId = sessionContext.getLoggedUser().getId();
         slService = new AccountLinkingService();
-        pwdService = new PasswordService();
         providers = AvailableProviders.get(true);
         parseLinkedAccounts();
 
@@ -107,7 +103,7 @@ public class AccountLinkingViewModel {
     @Command
     public void disable(@BindingParam("provider") Provider provider) {
 
-        if (linkedTotal > 1 || pwdService.hasPassword(userId)) {
+        if (linkedTotal > 1 || slService.hasPassword(userId)) {
             boolean succ = slService.unlink(userId, provider);
             if (succ) {
                 parseLinkedAccounts();
@@ -134,7 +130,7 @@ public class AccountLinkingViewModel {
     @Command
     public void remove(@BindingParam("provider") Provider provider) {
 
-        if (linkedTotal > 1 || pwdService.hasPassword(userId)) {
+        if (linkedTotal > 1 || slService.hasPassword(userId)) {
             Messagebox.show(Labels.getLabel("sociallogin.remove_hint"), null, Messagebox.YES | Messagebox.NO, Messagebox.QUESTION,
                     event -> {
                         if (Messagebox.ON_YES.equals(event.getName())) {
