@@ -301,8 +301,8 @@
             			}
             			
             			imgMarkup = '<img alt="' + provider + '" src="' + logo + '" width="40"></img>'
-            			aMarkup = '<a class="' + cls[i % cls.length] + '" href="javascript:idp_redirect(\'' + provider + '\')" style="padding:6px;text-decoration:none">' + imgMarkup + ' ' + provider + '</a>'
-            			 
+            			//aMarkup = '<a class="' + cls[i % cls.length] + '" href="javascript:idp_redirect(\'' + provider + '\')" style="padding:6px;text-decoration:none">' + imgMarkup + ' ' + provider + '</a>'
+            			aMarkup = '<a style="padding:6px;color:black;text-decoration:none" href="javascript:idp_redirect(\'' + provider + '\')">' + imgMarkup + ' ' + provider + '</a>' 
             			elem.append("<li>" + aMarkup + "</li>")
             		}
             	} catch (e) {

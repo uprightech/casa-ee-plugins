@@ -1,4 +1,4 @@
-<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native" xmlns:h="xhtml">
+<z:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns="native">
 
     <li>
         <a class="db pv3 pl1 ${css.menuItem}" href="${zkService.contextPath}${base}/" data-priority="${priority}">
