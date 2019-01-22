@@ -276,7 +276,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return page
 
-        return "casa.xhtml"
+        return "/casa.xhtml"
 
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
@@ -672,7 +672,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         try:
             passportDN = CdiUtil.bean(ConfigurationFactory).getLdapConfiguration().getString("oxpassport_ConfigurationEntryDN")
-            entryManager = CdiUtil.bean(AppInitializer).getLdapEntryManager()
+            entryManager = CdiUtil.bean(AppInitializer).createLdapEntryManager()
             config = LdapOxPassportConfiguration()
             config = entryManager.find(config.getClass(), passportDN).getPassportConfigurations()
 
