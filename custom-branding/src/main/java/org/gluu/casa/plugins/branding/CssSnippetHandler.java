@@ -18,8 +18,8 @@ public class CssSnippetHandler {
     /* Values of this constants are chosen with respect to file css-component-rules.properties */
     private static final String HEADER_SELECTOR = "cust-header";
     private static final String PRIMARY_BUTTON_SELECTOR = "cust-primary-button";
-    private static final String SECONDARY_BUTTON_SELECTOR = "cust-secondary-button";
-    private static final String TERTIARY_BUTTON_SELECTOR = "cust-tertiary-button";
+    private static final String SECONDARY_BUTTON_SELECTOR = "cust-cancel-button";
+    private static final String TERTIARY_BUTTON_SELECTOR = "cust-misc-button";
     private static final String FOOTER_SELECTOR = "cust-footer-rule";
 
     private static final String PRIMARY_BUTTON_DEF_COLOR = "#FF80CC"; /* pink */

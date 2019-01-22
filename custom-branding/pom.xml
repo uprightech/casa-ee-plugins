@@ -41,8 +41,8 @@
                             <Plugin-Provider>Gluu Inc.</Plugin-Provider>
                             <Plugin-Class>org.gluu.casa.plugins.branding.CustomBrandingPlugin</Plugin-Class>
                             <Plugin-Description>
-                                Allows admins to apply a quick design customization by choosing colors, favicon, 
-                                and logo. Or alternatively, to supply all assets (images and CSS files) externally.
+                                Allows administrators to apply a quick design customization by choosing logo, favicon,
+                                button colors, and footer text. Alternatively, admins can supply all assets (images and CSS files) externally.
                             </Plugin-Description>
                             <Plugin-License>Visit https://github.com/GluuFederation/casa-ee-plugins/raw/master/LICENSE</Plugin-License>
                             <Logger-Name>org.gluu.casa.plugins</Logger-Name>
@@ -72,7 +72,7 @@
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxcore-util</artifactId>
-            <version>3.1.5-SNAPSHOT</version>
+            <version>3.1.5.Final</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
