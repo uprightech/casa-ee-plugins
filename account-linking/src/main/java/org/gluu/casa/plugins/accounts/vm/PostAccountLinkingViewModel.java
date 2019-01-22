@@ -9,9 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.bind.annotation.Init;
 import org.zkoss.util.resource.Labels;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author jgomer
@@ -61,6 +65,7 @@ public class PostAccountLinkingViewModel {
                 } else {
                     text = summary.getErrorMessage();
                 }
+                expirePassportCookie(provider);
             } else {
                 logger.warn("No linking is pending for provider {} and user {}", provider, userId);
             }
@@ -68,6 +73,18 @@ public class PostAccountLinkingViewModel {
             text = e.getMessage();
             logger.error(text, e);
         }
+
+    }
+
+    private void expirePassportCookie(String provider) {
+        //Clean cookie set in password by a call to /casa/:provider/:token
+        Cookie coo = new Cookie("casa-" + provider, "");
+        coo.setPath("/");
+        coo.setSecure(true);
+        coo.setHttpOnly(true);
+        coo.setMaxAge(0);
+        HttpServletResponse response = (HttpServletResponse) Executions.getCurrent().getNativeResponse();
+        response.addCookie(coo);
 
     }
 
