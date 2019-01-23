@@ -289,6 +289,12 @@
             	try {
             		var externalProviders = JSON.parse(jsonProviders)
             		var ids = Object.keys(externalProviders)
+
+				function comp(p1, p2) {
+					return externalProviders[p1].saml == externalProviders[p2].saml ? 0 : 1
+				}
+				ids.sort(comp)
+				
             		var cls = ["fb", "twt", "goog", "link", "pin", "git", "pay", "fsquare", "wk", "yout", "wind", "wordp", "insta"]
             		
             		for (var i = 0; i &lt; ids.length; i++) {

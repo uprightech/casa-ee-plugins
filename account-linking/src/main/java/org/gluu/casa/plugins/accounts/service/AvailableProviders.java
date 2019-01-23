@@ -86,8 +86,13 @@ public class AvailableProviders {
                     prv.setType(ProviderType.SAML);
                     prv.setName(key);
 
-                    Object logo = props.get("logo_img");
-                    Optional.ofNullable(logo).ifPresent(l -> prv.setLogo(l.toString()));
+                    String logo = Optional.ofNullable(props.get("logo_img")).map(Object::toString).orElse(null);
+                    if (logo != null) {
+                        if (!logo.startsWith("http")) {
+                            logo = "/oxauth/auth/passport/" + logo;
+                        }
+                        prv.setLogo(logo);
+                    }
                     providers.add(prv);
                 }
             }
