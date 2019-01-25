@@ -599,6 +599,8 @@ class PersonAuthentication(PersonAuthenticationType):
             authzParams["acr_values"] = self.getAcrFor(isSaml)
             # set the provider to use
             authzParams[self.preSelParams["saml" if isSaml else "social"]] = self.encodeProvider(providerName)
+            # avoids passport flow updating the profile of user if he has been provisioned previously
+            authzParams["skipPassportProfileUpdate"] = "true"
             
             # copy the params in the current casa request
             for param in params:
