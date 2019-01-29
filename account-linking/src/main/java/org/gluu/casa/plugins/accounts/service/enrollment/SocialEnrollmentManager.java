@@ -112,6 +112,8 @@ public class SocialEnrollmentManager extends AbstractEnrollmentManager {
                         list.add(externalUid);
                     }
                 }
+            } else {
+                list.add(externalUid);
             }
         }
         return new Pair<>(oxExternalUid, list);

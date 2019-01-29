@@ -39,7 +39,7 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
     public boolean link(IdentityPerson p, String externalId) {
 
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
-        list.add(getFormatedAttributeVal(externalId));
+        list.add(getFormattedAttributeVal(externalId));
 
         logger.info("Linked accounts for {} will be {}", p.getUid(), list);
         p.setOxExternalUid(list.toArray(new String[0]));
@@ -60,7 +60,7 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
         }
 
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxUnlinkedExternalUids()));
-        list.add(getFormatedAttributeVal(uid));
+        list.add(getFormattedAttributeVal(uid));
         p.setOxUnlinkedExternalUids(list.toArray(new String[0]));
         return updatePerson(p);
 
@@ -74,53 +74,47 @@ public class SamlEnrollmentManager extends AbstractEnrollmentManager {
         }
 
         List<String> list = new ArrayList<>(Utils.listfromArray(p.getOxExternalUid()));
-        list.add(getFormatedAttributeVal(uid));
+        list.add(getFormattedAttributeVal(uid));
         p.setOxExternalUid(list.toArray(new String[0]));
         return updatePerson(p);
 
     }
 
+    public boolean isAssigned(String uid) {
+        IdentityPerson p = new IdentityPerson();
+        p.setOxExternalUid(getFormattedAttributeVal(uid));
+        return ldapService.find(p, IdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
+    }
+
     private String removeProvider(IdentityPerson p) {
 
-        String externalUid = null;
         String pattern = String.format("%s%s:",OXEXTERNALUID_PREFIX, provider.getName());
 
         Set<String> externalUids = new HashSet<>(Utils.listfromArray(p.getOxExternalUid()));
-        Set<String> unlinkedUIds = new HashSet<>(Utils.listfromArray(p.getOxUnlinkedExternalUids()));
+        Set<String> unlinkedUids = new HashSet<>(Utils.listfromArray(p.getOxUnlinkedExternalUids()));
 
-        for (String str : externalUids) {
-            if (str.startsWith(pattern)) {
-                externalUid = str.substring(pattern.length());
-                break;
-            }
+        String externalUid = externalUids.stream().filter(str -> str.startsWith(pattern)).findFirst()
+                .map(str -> str.substring(pattern.length())).orElse("");
+        if (externalUid.length() == 0) {
+            externalUid = unlinkedUids.stream().filter(str -> str.startsWith(pattern)).findFirst()
+                    .map(str -> str.substring(pattern.length())).orElse("");
         }
 
-        for (String str : unlinkedUIds) {
-            if (str.startsWith(pattern)) {
-                externalUid = str.substring(pattern.length());
-                break;
-            }
-        }
-
-        if (externalUid != null) {
-            String str = getFormatedAttributeVal(externalUid);
+        if (externalUid.length() > 0) {
+            String str = getFormattedAttributeVal(externalUid);
             externalUids.remove(str);
-            unlinkedUIds.remove(str);
+            unlinkedUids.remove(str);
+        } else {
+            externalUid = null;
         }
 
         p.setOxExternalUid(externalUids.toArray(new String[0]));
-        p.setOxUnlinkedExternalUids(unlinkedUIds.toArray(new String[0]));
+        p.setOxUnlinkedExternalUids(unlinkedUids.toArray(new String[0]));
         return externalUid;
 
     }
 
-    public boolean isAssigned(String uid) {
-        IdentityPerson p = new IdentityPerson();
-        p.setOxExternalUid(getFormatedAttributeVal(uid));
-        return ldapService.find(p, IdentityPerson.class, ldapService.getPeopleDn()).size() > 0;
-    }
-
-    private String getFormatedAttributeVal(String uid) {
+    private String getFormattedAttributeVal(String uid) {
         return String.format("passport-saml:%s:%s", provider.getName(), uid);
     }
 
